@@ -1,0 +1,31 @@
+# https://docs.devin.ai/onboard-devin/environment-yaml
+# Commands run from the repo root.
+
+# One-time setup (e.g., install system tools, global CLIs).
+initialize: |
+  npm install -g @angular/cli@16.2.0
+
+# Install project dependencies (runs every session).
+maintenance: |
+  npm install
+
+# Reference info for agent
+knowledge:
+  - name: chrome-binary
+    contents: |
+      Set CHROME_BIN for Karma tests:
+      export CHROME_BIN=/opt/.devin/chrome/chrome/linux-133.0.6943.126/chrome-linux64/chrome
+  - name: lint
+    contents: |
+      npx ng lint
+  - name: test
+    contents: |
+      CHROME_BIN=/opt/.devin/chrome/chrome/linux-133.0.6943.126/chrome-linux64/chrome npm run test-headless
+  - name: build
+    contents: |
+      npx ng build
+  - name: run-app
+    contents: |
+      npx ng serve --port 4200
+      # App available at http://localhost:4200/petclinic/
+      # Note: This is a frontend-only app. It requires the spring-petclinic-rest backend for full functionality.
