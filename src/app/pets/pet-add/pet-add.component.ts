@@ -30,12 +30,13 @@ import {PetTypeService} from '../../pettypes/pettype.service';
 import {PetService} from '../pet.service';
 import {OwnerService} from '../../owners/owner.service';
 
-import * as moment from 'moment';
+import moment from 'moment';
 
 @Component({
-  selector: 'app-pet-add',
-  templateUrl: './pet-add.component.html',
-  styleUrls: ['./pet-add.component.css']
+    selector: 'app-pet-add',
+    templateUrl: './pet-add.component.html',
+    styleUrls: ['./pet-add.component.css'],
+    standalone: false
 })
 export class PetAddComponent implements OnInit {
   pet: Pet;
