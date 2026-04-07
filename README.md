@@ -170,3 +170,13 @@ Before running the tests make sure you are serving the app via `ng serve`.
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+## Pre-commit Hooks
+
+This repository uses [pre-commit](https://pre-commit.com/) with [gitleaks](https://github.com/gitleaks/gitleaks) for secret detection.
+
+### Setup
+1. Install pre-commit: `pip install pre-commit`
+2. Install the hooks: `pre-commit install`
+3. (Optional) Run against all files: `pre-commit run --all-files`
+
