@@ -79,9 +79,9 @@ export default function OwnerDetail() {
 
   if (isLoading || !owner) return <div>Loading...</div>;
 
-  const handleEditPet = (pet: Pet) => navigate(`/pets/${pet.id}/edit`);
+  const handleEditPet = (pet: Pet) => navigate(`/owners/${id}/pets/${pet.id}/edit`);
   const handleDeletePet = (pet: Pet) => deletePetMutation.mutate(pet.id);
-  const handleAddVisit = (pet: Pet) => navigate(`/pets/${pet.id}/visits/add`);
+  const handleAddVisit = (pet: Pet) => navigate(`/owners/${id}/pets/${pet.id}/visits/add`);
   const handleEditVisit = (visit: Visit) => navigate(`/visits/${visit.id}/edit`);
   const handleDeleteVisit = (visit: Visit) => deleteVisitMutation.mutate(visit.id);
 

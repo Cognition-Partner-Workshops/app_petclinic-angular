@@ -29,7 +29,7 @@ export default function VisitEdit() {
   const onSubmit = (data: VisitFormData) => {
     updateMutation.mutate(
       { id: Number(id), visit: { ...data, id: Number(id) } },
-      { onSuccess: () => navigate(-1 as unknown as string) }
+      { onSuccess: () => navigate(-1) }
     );
   };
 
