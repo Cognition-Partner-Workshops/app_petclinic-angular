@@ -27,6 +27,7 @@ import {Owner} from '../owner';
 
 
 @Component({
+  standalone: false,
   selector: 'app-owner-detail',
   templateUrl: './owner-detail.component.html',
   styleUrls: ['./owner-detail.component.css']
