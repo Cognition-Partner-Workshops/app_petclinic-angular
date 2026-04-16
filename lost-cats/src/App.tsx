@@ -153,6 +153,13 @@ function App() {
     reunited: <Heart className="w-4 h-4" />,
   }
 
+  const formatDate = (dateStr: string, options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' }) => {
+    if (!dateStr) return 'Date not provided'
+    const parsed = new Date(dateStr + 'T00:00:00')
+    if (isNaN(parsed.getTime())) return dateStr
+    return parsed.toLocaleDateString('en-US', options)
+  }
+
   const counts = {
     all: announcements.length,
     lost: announcements.filter((a) => a.status === 'lost').length,
@@ -282,7 +289,7 @@ function App() {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Calendar className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                      <span>{new Date(announcement.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                      <span>{formatDate(announcement.date)}</span>
                     </div>
                   </div>
                   <div className="mt-3 flex gap-2">
@@ -477,7 +484,7 @@ function App() {
                   <div>
                     <div className="text-xs text-gray-500 uppercase tracking-wide">Date</div>
                     <div className="text-gray-800 font-medium">
-                      {new Date(selectedAnnouncement.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                      {formatDate(selectedAnnouncement.date, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                     </div>
                   </div>
                 </div>
