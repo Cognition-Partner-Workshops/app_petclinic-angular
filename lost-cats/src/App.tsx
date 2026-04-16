@@ -1,12 +1,44 @@
-import { useState } from 'react'
-import { Search, Plus, MapPin, Calendar, Phone, X, Cat, Heart, AlertTriangle, Filter } from 'lucide-react'
+import { useState, useRef, useCallback } from 'react'
+import { Search, Plus, MapPin, Calendar, Phone, X, Cat, Heart, AlertTriangle, Filter, Map, Grid3X3, Upload, ImageIcon } from 'lucide-react'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import './App.css'
+
+const lostIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+})
+
+const foundIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+})
+
+const reunitedIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+})
 
 interface CatAnnouncement {
   id: number
   name: string
   description: string
   location: string
+  lat: number
+  lng: number
   date: string
   contact: string
   image: string
@@ -21,6 +53,8 @@ const initialAnnouncements: CatAnnouncement[] = [
     name: 'Whiskers',
     description: 'Friendly orange tabby cat, very playful. Has a small notch on the left ear. Responds to name and treats.',
     location: 'Downtown Park, Main Street',
+    lat: 40.7128,
+    lng: -74.006,
     date: '2026-04-14',
     contact: '+1 (555) 123-4567',
     image: 'https://images.unsplash.com/photo-1615497001839-b0a0eac3274c?w=400&h=300&fit=crop',
@@ -33,6 +67,8 @@ const initialAnnouncements: CatAnnouncement[] = [
     name: 'Shadow',
     description: 'All black cat with bright green eyes. Very shy around strangers. Indoor cat that escaped through a window.',
     location: 'Elm Street, near the library',
+    lat: 40.7282,
+    lng: -73.7949,
     date: '2026-04-12',
     contact: '+1 (555) 234-5678',
     image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=300&fit=crop',
@@ -45,6 +81,8 @@ const initialAnnouncements: CatAnnouncement[] = [
     name: 'Luna',
     description: 'White and gray fluffy cat with blue eyes. Wearing a pink collar with a bell. Very friendly and loves people.',
     location: 'Oak Avenue, Riverside',
+    lat: 40.7489,
+    lng: -73.9680,
     date: '2026-04-10',
     contact: '+1 (555) 345-6789',
     image: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=400&h=300&fit=crop',
@@ -57,6 +95,8 @@ const initialAnnouncements: CatAnnouncement[] = [
     name: 'Mittens',
     description: 'Calico cat with distinctive white paws. Last seen near the fish market. Friendly with other cats.',
     location: 'Harbor District',
+    lat: 40.6892,
+    lng: -74.0445,
     date: '2026-04-08',
     contact: '+1 (555) 456-7890',
     image: 'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=400&h=300&fit=crop',
@@ -69,6 +109,8 @@ const initialAnnouncements: CatAnnouncement[] = [
     name: 'Simba',
     description: 'Large ginger cat, neutered male. Missing from backyard. Has a microchip. Very vocal and demanding.',
     location: 'Maple Drive, Westside',
+    lat: 40.7580,
+    lng: -73.9855,
     date: '2026-04-15',
     contact: '+1 (555) 567-8901',
     image: 'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=400&h=300&fit=crop',
@@ -81,6 +123,8 @@ const initialAnnouncements: CatAnnouncement[] = [
     name: 'Unknown',
     description: 'Found this sweet gray kitten hiding under a car. No collar or tags. Appears to be about 6 months old.',
     location: 'Pine Street, near school',
+    lat: 40.7061,
+    lng: -74.0132,
     date: '2026-04-13',
     contact: '+1 (555) 678-9012',
     image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop',
@@ -90,16 +134,28 @@ const initialAnnouncements: CatAnnouncement[] = [
   },
 ]
 
+const markerIcons = {
+  lost: lostIcon,
+  found: foundIcon,
+  reunited: reunitedIcon,
+}
+
 function App() {
   const [announcements, setAnnouncements] = useState<CatAnnouncement[]>(initialAnnouncements)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'lost' | 'found' | 'reunited'>('all')
   const [showForm, setShowForm] = useState(false)
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<CatAnnouncement | null>(null)
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid')
+  const [isDragging, setIsDragging] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     location: '',
+    lat: '',
+    lng: '',
     date: '',
     contact: '',
     image: '',
@@ -119,18 +175,62 @@ function App() {
     return matchesSearch && matchesFilter
   })
 
+  const handleImageFile = useCallback((file: File) => {
+    if (!file.type.startsWith('image/')) return
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const result = reader.result as string
+      setImagePreview(result)
+      setFormData((prev) => ({ ...prev, image: result }))
+    }
+    reader.readAsDataURL(file)
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files[0]
+    if (file) handleImageFile(file)
+  }, [handleImageFile])
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) handleImageFile(file)
+  }, [handleImageFile])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const newAnnouncement: CatAnnouncement = {
       id: Date.now(),
-      ...formData,
+      name: formData.name,
+      description: formData.description,
+      location: formData.location,
+      lat: parseFloat(formData.lat) || 40.7128 + (Math.random() - 0.5) * 0.1,
+      lng: parseFloat(formData.lng) || -74.006 + (Math.random() - 0.5) * 0.1,
+      date: formData.date,
+      contact: formData.contact,
       image: formData.image || 'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Photo',
+      status: formData.status,
+      color: formData.color,
+      breed: formData.breed,
     }
     setAnnouncements([newAnnouncement, ...announcements])
     setFormData({
       name: '',
       description: '',
       location: '',
+      lat: '',
+      lng: '',
       date: '',
       contact: '',
       image: '',
@@ -138,6 +238,7 @@ function App() {
       color: '',
       breed: '',
     })
+    setImagePreview(null)
     setShowForm(false)
   }
 
@@ -219,13 +320,39 @@ function App() {
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-700 placeholder-gray-400"
             />
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
-          >
-            <Plus className="w-5 h-5" />
-            Post Announcement
-          </button>
+          <div className="flex gap-2">
+            <div className="flex bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                  viewMode === 'grid'
+                    ? 'bg-orange-600 text-white'
+                    : 'text-gray-600 hover:bg-orange-50'
+                }`}
+              >
+                <Grid3X3 className="w-4 h-4" />
+                Grid
+              </button>
+              <button
+                onClick={() => setViewMode('map')}
+                className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                  viewMode === 'map'
+                    ? 'bg-orange-600 text-white'
+                    : 'text-gray-600 hover:bg-orange-50'
+                }`}
+              >
+                <Map className="w-4 h-4" />
+                Map
+              </button>
+            </div>
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
+            >
+              <Plus className="w-5 h-5" />
+              Post Announcement
+            </button>
+          </div>
         </div>
 
         {/* Filter Tabs */}
@@ -246,15 +373,91 @@ function App() {
           ))}
         </div>
 
-        {/* Announcements Grid */}
-        {filteredAnnouncements.length === 0 ? (
-          <div className="text-center py-16">
-            <Cat className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-500">No announcements found</h3>
-            <p className="text-gray-400 mt-2">Try adjusting your search or filters</p>
+        {/* Map View */}
+        {viewMode === 'map' && (
+          <div className="mb-8 rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+            <div className="bg-white p-3 border-b border-gray-100 flex items-center gap-2">
+              <Map className="w-5 h-5 text-orange-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Showing {filteredAnnouncements.length} cat{filteredAnnouncements.length !== 1 ? 's' : ''} on map
+              </span>
+              <div className="flex gap-3 ml-auto text-xs">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> Lost</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" /> Found</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Reunited</span>
+              </div>
+            </div>
+            <MapContainer
+              center={[40.7128, -74.006]}
+              zoom={12}
+              style={{ height: '500px', width: '100%' }}
+              scrollWheelZoom={true}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {filteredAnnouncements.map((announcement) => (
+                <Marker
+                  key={announcement.id}
+                  position={[announcement.lat, announcement.lng]}
+                  icon={markerIcons[announcement.status]}
+                  eventHandlers={{
+                    click: () => setSelectedAnnouncement(announcement),
+                  }}
+                >
+                  <Popup>
+                    <div className="text-center" style={{ minWidth: '180px' }}>
+                      <img
+                        src={announcement.image}
+                        alt={announcement.name}
+                        style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px', marginBottom: '8px' }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://placehold.co/200x100/f3f4f6/9ca3af?text=No+Photo'
+                        }}
+                      />
+                      <strong style={{ fontSize: '14px' }}>{announcement.name}</strong>
+                      <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
+                        {announcement.status.toUpperCase()} - {announcement.color} {announcement.breed}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#888', marginTop: '4px' }}>
+                        {announcement.location}
+                      </div>
+                      <button
+                        onClick={() => setSelectedAnnouncement(announcement)}
+                        style={{
+                          marginTop: '8px',
+                          padding: '4px 12px',
+                          background: '#ea580c',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                        }}
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        )}
+
+        {/* Grid View */}
+        {viewMode === 'grid' && (
+          <>
+            {filteredAnnouncements.length === 0 ? (
+              <div className="text-center py-16">
+                <Cat className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-500">No announcements found</h3>
+                <p className="text-gray-400 mt-2">Try adjusting your search or filters</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAnnouncements.map((announcement) => (
               <div
                 key={announcement.id}
@@ -300,19 +503,21 @@ function App() {
               </div>
             ))}
           </div>
+            )}
+          </>
         )}
       </main>
 
       {/* Post Announcement Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowForm(false)}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => { setShowForm(false); setImagePreview(null) }}>
           <div
             className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <h2 className="text-xl font-bold text-gray-900">Post Announcement</h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <button onClick={() => { setShowForm(false); setImagePreview(null) }} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -414,16 +619,68 @@ function App() {
                   </div>
                 </label>
               </div>
-              <label>
-                <span className="block text-sm font-medium text-gray-700 mb-1">Photo URL (optional)</span>
+              {/* Image Upload */}
+              <div>
+                <span className="block text-sm font-medium text-gray-700 mb-1">Cat Photo</span>
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
+                    isDragging
+                      ? 'border-orange-400 bg-orange-50'
+                      : imagePreview
+                        ? 'border-green-300 bg-green-50'
+                        : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
+                  }`}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  {imagePreview ? (
+                    <div className="space-y-3">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="mx-auto max-h-32 rounded-lg object-cover"
+                      />
+                      <p className="text-sm text-green-600 font-medium">Photo uploaded! Click or drag to replace.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                        {isDragging ? (
+                          <Upload className="w-6 h-6 text-orange-500" />
+                        ) : (
+                          <ImageIcon className="w-6 h-6 text-gray-400" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">
+                          {isDragging ? 'Drop your photo here!' : 'Drag & drop a photo or click to browse'}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">Supports JPG, PNG, GIF, WebP</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 mt-2 text-center">Or paste an image URL below (optional)</p>
                 <input
                   type="url"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  value={formData.image.startsWith('data:') ? '' : formData.image}
+                  onChange={(e) => {
+                    setFormData({ ...formData, image: e.target.value })
+                    setImagePreview(null)
+                  }}
                   placeholder="https://example.com/cat-photo.jpg"
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-700 placeholder-gray-400"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-700 placeholder-gray-400 text-sm"
                 />
-              </label>
+              </div>
               <button
                 type="submit"
                 className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
