@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { waitForAsync } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import Spy = jasmine.Spy;
 
 class SpecialityServiceStub {
@@ -70,5 +70,18 @@ describe('SpecialtyAddComponent', () => {
 
   it('should create SpecialtyAddComponent', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should submit specialty and emit newSpeciality event', () => {
+    spyOn(component.newSpeciality, 'emit');
+    component.onSubmit(testSpecialty);
+    expect(component.addedSuccess).toBe(true);
+    expect(component.newSpeciality.emit).toHaveBeenCalledWith(testSpecialty);
+  });
+
+  it('should set errorMessage on submit error', () => {
+    spy.and.returnValue(throwError('submit error'));
+    component.onSubmit(testSpecialty);
+    expect(component.errorMessage).toBe('submit error');
   });
 });

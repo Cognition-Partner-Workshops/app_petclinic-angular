@@ -92,6 +92,7 @@
             }
           },
           "options": {
+            "codeCoverage": true,
             "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",

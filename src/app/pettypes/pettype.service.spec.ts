@@ -1,42 +1,83 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
-
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { inject, TestBed, waitForAsync } from '@angular/core/testing';
-import {PetTypeService} from './pettype.service';
-import {HttpClient} from '@angular/common/http';
-import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { PetTypeService } from './pettype.service';
+import { HttpErrorHandler } from '../error.service';
+import { PetType } from './pettype';
+import { environment } from '../../environments/environment';
 
 describe('PetTypeService', () => {
+  let service: PetTypeService;
+  let httpMock: HttpTestingController;
+  const entityUrl = environment.REST_API_URL + 'pettypes';
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // Import the HttpClient mocking services
       imports: [HttpClientTestingModule],
-      providers: [PetTypeService]
+      providers: [PetTypeService, HttpErrorHandler]
     });
+    service = TestBed.inject(PetTypeService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('should ...', waitForAsync(inject([HttpTestingController], (petTypeService: PetTypeService, http: HttpClient) => {
-    expect(petTypeService).toBeTruthy();
-  })));
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('should return pet types on getPetTypes', () => {
+    const mockPetTypes: PetType[] = [
+      { id: 1, name: 'cat' },
+      { id: 2, name: 'dog' }
+    ];
+    service.getPetTypes().subscribe(petTypes => {
+      expect(petTypes.length).toBe(2);
+      expect(petTypes).toEqual(mockPetTypes);
+    });
+    const req = httpMock.expectOne(entityUrl);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPetTypes);
+  });
+
+  it('should return a pet type by id on getPetTypeById', () => {
+    const mockPetType: PetType = { id: 1, name: 'cat' };
+    service.getPetTypeById('1').subscribe(petType => {
+      expect(petType).toEqual(mockPetType);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPetType);
+  });
+
+  it('should update a pet type on updatePetType', () => {
+    const mockPetType: PetType = { id: 1, name: 'cat updated' };
+    service.updatePetType('1', mockPetType).subscribe(petType => {
+      expect(petType).toEqual(mockPetType);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('PUT');
+    req.flush(mockPetType);
+  });
+
+  it('should add a pet type on addPetType', () => {
+    const mockPetType: PetType = { id: null, name: 'bird' };
+    const returnPetType: PetType = { id: 3, name: 'bird' };
+    service.addPetType(mockPetType).subscribe(petType => {
+      expect(petType).toEqual(returnPetType);
+    });
+    const req = httpMock.expectOne(entityUrl);
+    expect(req.request.method).toBe('POST');
+    req.flush(returnPetType);
+  });
+
+  it('should delete a pet type on deletePetType', () => {
+    service.deletePetType('1').subscribe(response => {
+      expect(response).toBe(204);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(204);
+  });
 });

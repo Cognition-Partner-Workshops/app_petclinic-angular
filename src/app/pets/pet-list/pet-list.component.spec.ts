@@ -31,7 +31,7 @@ import { PetService } from '../pet.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
 import { Pet } from '../pet';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import Spy = jasmine.Spy;
 
 class PetServiceStub {
@@ -97,5 +97,30 @@ describe('PetListComponent', () => {
     fixture.detectChanges();
     component.deletePet(component.pet);
     expect(spy.calls.any()).toBe(true, 'deletePet called');
+  });
+
+  it('should set deleteSuccess on successful delete', () => {
+    component.deletePet(inputPet);
+    expect(component.deleteSuccess).toBe(true);
+  });
+
+  it('should set errorMessage on deletePet error', () => {
+    spy.and.returnValue(throwError('delete error'));
+    component.deletePet(inputPet);
+    expect(component.errorMessage).toBe('delete error');
+  });
+
+  it('should navigate to edit pet on editPet', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.editPet(inputPet);
+    expect(router.navigate).toHaveBeenCalledWith(['/pets', 1, 'edit']);
+  });
+
+  it('should navigate to add visit on addVisit', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.addVisit(inputPet);
+    expect(router.navigate).toHaveBeenCalledWith(['/pets', 1, 'visits', 'add']);
   });
 });

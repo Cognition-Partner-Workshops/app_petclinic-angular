@@ -7,7 +7,7 @@ import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
 import {FormsModule} from '@angular/forms';
-import {Observable, of} from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import Spy = jasmine.Spy;
 
 class PetTypeServiceStub {
@@ -54,5 +54,18 @@ describe('PettypeAddComponent', () => {
 
   it('should create PettypeAddComponent', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should submit pettype and emit newPetType event', () => {
+    spyOn(component.newPetType, 'emit');
+    component.onSubmit(testPettype);
+    expect(component.pettype).toEqual(testPettype);
+    expect(component.newPetType.emit).toHaveBeenCalledWith(testPettype);
+  });
+
+  it('should set errorMessage on submit error', () => {
+    spy.and.returnValue(throwError('submit error'));
+    component.onSubmit(testPettype);
+    expect(component.errorMessage).toBe('submit error');
   });
 });

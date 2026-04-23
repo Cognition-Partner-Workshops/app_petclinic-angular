@@ -171,6 +171,15 @@ describe('OwnerService', () => {
     expect(req.request.body).toEqual(null);
   });
 
+  it('should search owners without lastName query param when undefined', () => {
+    ownerService.searchOwners(undefined).subscribe(owners => {
+      expect(owners).toEqual(expectedOwners);
+    });
+    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    expect(req.request.method).toEqual('GET');
+    req.flush(expectedOwners);
+  });
+
   it('search for delete Owner', () => {
 
     const errorResponse = new HttpErrorResponse({

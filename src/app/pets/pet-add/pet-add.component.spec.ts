@@ -30,7 +30,7 @@ import {FormsModule} from '@angular/forms';
 import {PetService} from '../pet.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
-import {Observable, of} from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import {Pet} from '../pet';
 import {OwnerService} from '../../owners/owner.service';
 import {PetTypeService} from '../../pettypes/pettype.service';
@@ -48,6 +48,9 @@ class OwnerServiceStub {
 
 class PetServiceStub {
   getPetById(petId: string): Observable<Pet> {
+    return of();
+  }
+  addPet(pet: Pet): Observable<Pet> {
     return of();
   }
 }
@@ -110,5 +113,69 @@ describe('PetAddComponent', () => {
 
   it('should create PetAddComponent', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should load pet types on init', () => {
+    const petTypeService = fixture.debugElement.injector.get(PetTypeService);
+    const mockPetTypes: PetType[] = [{ id: 1, name: 'cat' }, { id: 2, name: 'dog' }];
+    spyOn(petTypeService, 'getPetTypes').and.returnValue(of(mockPetTypes));
+    const ownerService = fixture.debugElement.injector.get(OwnerService);
+    spyOn(ownerService, 'getOwnerById').and.returnValue(of(testPet.owner));
+    component.ngOnInit();
+    expect(component.petTypes).toEqual(mockPetTypes);
+  });
+
+  it('should load current owner on init', () => {
+    const petTypeService = fixture.debugElement.injector.get(PetTypeService);
+    spyOn(petTypeService, 'getPetTypes').and.returnValue(of([]));
+    const ownerService = fixture.debugElement.injector.get(OwnerService);
+    spyOn(ownerService, 'getOwnerById').and.returnValue(of(testPet.owner));
+    component.ngOnInit();
+    expect(component.currentOwner).toEqual(testPet.owner);
+  });
+
+  it('should set errorMessage on getPetTypes error', () => {
+    const petTypeService = fixture.debugElement.injector.get(PetTypeService);
+    spyOn(petTypeService, 'getPetTypes').and.returnValue(throwError('type error'));
+    const ownerService = fixture.debugElement.injector.get(OwnerService);
+    spyOn(ownerService, 'getOwnerById').and.returnValue(of(testPet.owner));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('type error');
+  });
+
+  it('should set errorMessage on getOwnerById error', () => {
+    const petTypeService = fixture.debugElement.injector.get(PetTypeService);
+    spyOn(petTypeService, 'getPetTypes').and.returnValue(of([]));
+    const ownerService = fixture.debugElement.injector.get(OwnerService);
+    spyOn(ownerService, 'getOwnerById').and.returnValue(throwError('owner error'));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('owner error');
+  });
+
+  it('should submit pet and navigate to owner detail', () => {
+    const petServiceLocal = fixture.debugElement.injector.get(PetService);
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.currentOwner = testPet.owner;
+    spyOn(petServiceLocal, 'addPet').and.returnValue(of(testPet));
+    component.onSubmit({ ...testPet, birthDate: '2010-09-07' });
+    expect(component.addedSuccess).toBe(true);
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', testPet.owner.id]);
+  });
+
+  it('should set errorMessage on submit error', () => {
+    const petServiceLocal = fixture.debugElement.injector.get(PetService);
+    component.currentOwner = testPet.owner;
+    spyOn(petServiceLocal, 'addPet').and.returnValue(throwError('submit error'));
+    component.onSubmit({ ...testPet, birthDate: '2010-09-07' });
+    expect(component.errorMessage).toBe('submit error');
+  });
+
+  it('should navigate to owner detail on gotoOwnerDetail', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.currentOwner = { id: 5 } as Owner;
+    component.gotoOwnerDetail();
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', 5]);
   });
 });

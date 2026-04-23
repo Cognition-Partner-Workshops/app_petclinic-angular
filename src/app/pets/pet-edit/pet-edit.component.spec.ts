@@ -33,14 +33,16 @@ import {PetTypeService} from '../../pettypes/pettype.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
 import {Pet} from '../pet';
-import {Observable, of} from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {PetType} from '../../pettypes/pettype';
 import Spy = jasmine.Spy;
 
 class OwnerServiceStub {
-
+  getOwnerById(ownerId: string): Observable<any> {
+    return of();
+  }
 }
 
 class PetServiceStub {
@@ -110,5 +112,60 @@ describe('PetEditComponent', () => {
 
   it('should create PetEditComponent', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should load pet types on init', () => {
+    const petTypeService = fixture.debugElement.injector.get(PetTypeService);
+    const mockPetTypes: PetType[] = [{ id: 1, name: 'cat' }, { id: 2, name: 'dog' }];
+    spyOn(petTypeService, 'getPetTypes').and.returnValue(of(mockPetTypes));
+    const ownerService = fixture.debugElement.injector.get(OwnerService);
+    spyOn(ownerService, 'getOwnerById').and.returnValue(of(testPet.owner));
+    spyOn(petService, 'getPetById').and.returnValue(of(testPet));
+    component.ngOnInit();
+    expect(component.petTypes).toEqual(mockPetTypes);
+  });
+
+  it('should load pet and owner on init', () => {
+    const petTypeService = fixture.debugElement.injector.get(PetTypeService);
+    spyOn(petTypeService, 'getPetTypes').and.returnValue(of([]));
+    const ownerService = fixture.debugElement.injector.get(OwnerService);
+    spyOn(ownerService, 'getOwnerById').and.returnValue(of(testPet.owner));
+    spyOn(petService, 'getPetById').and.returnValue(of(testPet));
+    component.ngOnInit();
+    expect(component.pet).toEqual(testPet);
+    expect(component.currentOwner).toEqual(testPet.owner);
+    expect(component.currentType).toEqual(testPet.type);
+  });
+
+  it('should set errorMessage on getPetById error', () => {
+    const petTypeService = fixture.debugElement.injector.get(PetTypeService);
+    spyOn(petTypeService, 'getPetTypes').and.returnValue(of([]));
+    spyOn(petService, 'getPetById').and.returnValue(throwError('pet error'));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('pet error');
+  });
+
+  it('should submit pet and navigate to owner detail', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.currentType = testPet.type;
+    component.currentOwner = testPet.owner;
+    spy.and.returnValue(of(testPet));
+    component.onSubmit({ ...testPet, birthDate: '2010-09-07' });
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', testPet.owner.id]);
+  });
+
+  it('should set errorMessage on submit error', () => {
+    component.currentType = testPet.type;
+    spy.and.returnValue(throwError('update error'));
+    component.onSubmit({ ...testPet, birthDate: '2010-09-07' });
+    expect(component.errorMessage).toBe('update error');
+  });
+
+  it('should navigate to owner detail on gotoOwnerDetail', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.gotoOwnerDetail(testPet.owner);
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', testPet.owner.id]);
   });
 });

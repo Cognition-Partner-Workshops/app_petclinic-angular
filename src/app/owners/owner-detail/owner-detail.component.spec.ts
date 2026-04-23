@@ -33,11 +33,14 @@ import { OwnerService } from '../owner.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
 import { Owner } from '../owner';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
 class OwnerServiceStub {
   getOwnerById(): Observable<Owner> {
     return of({ id: 1, firstName: 'James', lastName: 'Franklin'  } as Owner);
+  }
+  deleteOwner(ownerId: string): Observable<number> {
+    return of(204);
   }
 }
 
@@ -129,6 +132,32 @@ describe('OwnerDetailComponent', () => {
     addNewPetButton.click();
     spyOn(component, 'addPet').and.callThrough();
     expect(router.navigate).toHaveBeenCalledWith(['/owners']);
+  });
+
+  it('should set errorMessage on getOwnerById error', () => {
+    const ownerServiceLocal = fixture.debugElement.injector.get(OwnerService);
+    spyOn(ownerServiceLocal, 'getOwnerById').and.returnValue(throwError('load error'));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('load error');
+  });
+
+  it('should navigate to owners list on gotoOwnersList', () => {
+    spyOn(router, 'navigate');
+    component.gotoOwnersList();
+    expect(router.navigate).toHaveBeenCalledWith(['/owners']);
+  });
+
+  it('should navigate to edit owner on editOwner', () => {
+    spyOn(router, 'navigate');
+    component.owner = owner;
+    component.editOwner();
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', 10, 'edit']);
+  });
+
+  it('should navigate to add pet on addPet', () => {
+    spyOn(router, 'navigate');
+    component.addPet(owner);
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', 10, 'pets', 'add']);
   });
 
 });

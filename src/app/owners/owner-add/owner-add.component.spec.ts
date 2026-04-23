@@ -31,7 +31,7 @@ import { OwnerService } from '../owner.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { RouterStub } from '../../testing/router-stubs';
 import { Owner } from '../owner';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { OwnersRoutingModule } from '../owners-routing.module';
 import { OwnerListComponent } from '../owner-list/owner-list.component';
@@ -104,5 +104,28 @@ describe('OwnerAddComponent', () => {
     addOwnerButton.click();
     expect(component.onSubmit).toHaveBeenCalled();
   }));
+
+  it('should submit owner and navigate to owners list', () => {
+    const ownerServiceLocal = fixture.debugElement.injector.get(OwnerService);
+    const testOwner: Owner = { id: null, firstName: 'James', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
+    const returnOwner: Owner = { ...testOwner, id: 1 };
+    spyOn(ownerServiceLocal, 'addOwner').and.returnValue(of(returnOwner));
+    component.onSubmit(testOwner);
+    expect(component.owner).toEqual(returnOwner);
+    expect(router.navigate).toHaveBeenCalledWith(['/owners']);
+  });
+
+  it('should set errorMessage on submit error', () => {
+    const ownerServiceLocal = fixture.debugElement.injector.get(OwnerService);
+    const testOwner: Owner = { id: null, firstName: 'James', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
+    spyOn(ownerServiceLocal, 'addOwner').and.returnValue(throwError('submit error'));
+    component.onSubmit(testOwner);
+    expect(component.errorMessage).toBe('submit error');
+  });
+
+  it('should navigate to owners list on gotoOwnersList', () => {
+    component.gotoOwnersList();
+    expect(router.navigate).toHaveBeenCalledWith(['/owners']);
+  });
 
 });
