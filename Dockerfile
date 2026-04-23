@@ -28,6 +28,6 @@ EXPOSE 8080
 
 USER nginx
 
-HEALTHCHECK     CMD     [ "service", "nginx", "status" ]
+HEALTHCHECK     CMD     wget --quiet --tries=1 --spider http://localhost:8080/ || exit 1
 
 
