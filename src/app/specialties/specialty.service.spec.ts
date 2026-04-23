@@ -1,42 +1,109 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
+import { TestBed } from '@angular/core/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
+import { HttpResponse } from '@angular/common/http';
+import { Type } from '@angular/core';
 
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { inject, TestBed, waitForAsync } from '@angular/core/testing';
-import {SpecialtyService} from './specialty.service';
-import {HttpClient} from '@angular/common/http';
-import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
+import { SpecialtyService } from './specialty.service';
+import { Specialty } from './specialty';
+import { HttpErrorHandler } from '../error.service';
+import { environment } from '../../environments/environment';
 
 describe('SpecialtyService', () => {
+  let httpTestingController: HttpTestingController;
+  let specialtyService: SpecialtyService;
+  const entityUrl = environment.REST_API_URL + 'specialties';
+
+  const testSpecialty: Specialty = {
+    id: 1,
+    name: 'radiology',
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // Import the HttpClient mocking services
       imports: [HttpClientTestingModule],
-      providers: [SpecialtyService]
+      providers: [SpecialtyService, HttpErrorHandler],
     });
+    httpTestingController = TestBed.inject<HttpTestingController>(
+      HttpTestingController as Type<HttpTestingController>
+    );
+    specialtyService = TestBed.inject(SpecialtyService);
   });
 
-  it('should ...', waitForAsync(inject([HttpTestingController], (specialtyService: SpecialtyService, http: HttpClient) => {
-    expect(specialtyService).toBeTruthy();
-  })));
+  afterEach(() => {
+    httpTestingController.verify();
+  });
+
+  it('should return expected specialties (getSpecialties)', () => {
+    const expectedSpecialties: Specialty[] = [testSpecialty];
+
+    specialtyService.getSpecialties().subscribe(
+      (specialties) => expect(specialties).toEqual(expectedSpecialties),
+      fail
+    );
+
+    const req = httpTestingController.expectOne(entityUrl);
+    expect(req.request.method).toEqual('GET');
+    req.flush(expectedSpecialties);
+  });
+
+  it('should return a specialty by id (getSpecialtyById)', () => {
+    specialtyService.getSpecialtyById('1').subscribe(
+      (specialty) => expect(specialty).toEqual(testSpecialty),
+      fail
+    );
+
+    const req = httpTestingController.expectOne(entityUrl + '/1');
+    expect(req.request.method).toEqual('GET');
+    req.flush(testSpecialty);
+  });
+
+  it('should add a specialty (addSpecialty)', () => {
+    const newSpecialty: Specialty = { ...testSpecialty, id: null };
+
+    specialtyService.addSpecialty(newSpecialty).subscribe(
+      (specialty) => expect(specialty).toEqual(newSpecialty),
+      fail
+    );
+
+    const req = httpTestingController.expectOne(entityUrl);
+    expect(req.request.method).toEqual('POST');
+    expect(req.request.body).toEqual(newSpecialty);
+    const expectedResponse = new HttpResponse({
+      status: 201,
+      statusText: 'Created',
+      body: newSpecialty,
+    });
+    req.event(expectedResponse);
+  });
+
+  it('should update a specialty (updateSpecialty)', () => {
+    const updatedSpecialty: Specialty = { ...testSpecialty, name: 'surgery' };
+
+    specialtyService.updateSpecialty('1', updatedSpecialty).subscribe(
+      (specialty) => expect(specialty).toEqual(updatedSpecialty),
+      fail
+    );
+
+    const req = httpTestingController.expectOne(entityUrl + '/1');
+    expect(req.request.method).toEqual('PUT');
+    expect(req.request.body).toEqual(updatedSpecialty);
+    const expectedResponse = new HttpResponse({
+      status: 204,
+      statusText: 'No Content',
+      body: updatedSpecialty,
+    });
+    req.event(expectedResponse);
+  });
+
+  it('should delete a specialty (deleteSpecialty)', () => {
+    specialtyService.deleteSpecialty('1').subscribe();
+
+    const req = httpTestingController.expectOne(entityUrl + '/1');
+    expect(req.request.method).toEqual('DELETE');
+    expect(req.request.body).toEqual(null);
+    req.flush(null);
+  });
 });

@@ -1,42 +1,111 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
+import { TestBed } from '@angular/core/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
+import { HttpResponse } from '@angular/common/http';
+import { Type } from '@angular/core';
 
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { inject, TestBed, waitForAsync } from '@angular/core/testing';
-import {VetService} from './vet.service';
-import {HttpClient} from '@angular/common/http';
-import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
+import { VetService } from './vet.service';
+import { Vet } from './vet';
+import { HttpErrorHandler } from '../error.service';
+import { environment } from '../../environments/environment';
 
 describe('VetService', () => {
+  let httpTestingController: HttpTestingController;
+  let vetService: VetService;
+  const entityUrl = environment.REST_API_URL + 'vets';
+
+  const testVet: Vet = {
+    id: 1,
+    firstName: 'James',
+    lastName: 'Carter',
+    specialties: [{ id: 1, name: 'radiology' }],
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // Import the HttpClient mocking services
       imports: [HttpClientTestingModule],
-      providers: [VetService]
+      providers: [VetService, HttpErrorHandler],
     });
+    httpTestingController = TestBed.inject<HttpTestingController>(
+      HttpTestingController as Type<HttpTestingController>
+    );
+    vetService = TestBed.inject(VetService);
   });
 
-  it('should ...', waitForAsync(inject([HttpTestingController], (vetService: VetService, http: HttpClient) => {
-    expect(vetService).toBeTruthy();
-  })));
+  afterEach(() => {
+    httpTestingController.verify();
+  });
+
+  it('should return expected vets (getVets)', () => {
+    const expectedVets: Vet[] = [testVet];
+
+    vetService.getVets().subscribe(
+      (vets) => expect(vets).toEqual(expectedVets),
+      fail
+    );
+
+    const req = httpTestingController.expectOne(entityUrl);
+    expect(req.request.method).toEqual('GET');
+    req.flush(expectedVets);
+  });
+
+  it('should return a vet by id (getVetById)', () => {
+    vetService.getVetById('1').subscribe(
+      (vet) => expect(vet).toEqual(testVet),
+      fail
+    );
+
+    const req = httpTestingController.expectOne(entityUrl + '/1');
+    expect(req.request.method).toEqual('GET');
+    req.flush(testVet);
+  });
+
+  it('should add a vet (addVet)', () => {
+    const newVet: Vet = { ...testVet, id: null };
+
+    vetService.addVet(newVet).subscribe(
+      (vet) => expect(vet).toEqual(newVet),
+      fail
+    );
+
+    const req = httpTestingController.expectOne(entityUrl);
+    expect(req.request.method).toEqual('POST');
+    expect(req.request.body).toEqual(newVet);
+    const expectedResponse = new HttpResponse({
+      status: 201,
+      statusText: 'Created',
+      body: newVet,
+    });
+    req.event(expectedResponse);
+  });
+
+  it('should update a vet (updateVet)', () => {
+    const updatedVet: Vet = { ...testVet, firstName: 'Jim' };
+
+    vetService.updateVet('1', updatedVet).subscribe(
+      (vet) => expect(vet).toEqual(updatedVet),
+      fail
+    );
+
+    const req = httpTestingController.expectOne(entityUrl + '/1');
+    expect(req.request.method).toEqual('PUT');
+    expect(req.request.body).toEqual(updatedVet);
+    const expectedResponse = new HttpResponse({
+      status: 204,
+      statusText: 'No Content',
+      body: updatedVet,
+    });
+    req.event(expectedResponse);
+  });
+
+  it('should delete a vet (deleteVet)', () => {
+    vetService.deleteVet('1').subscribe();
+
+    const req = httpTestingController.expectOne(entityUrl + '/1');
+    expect(req.request.method).toEqual('DELETE');
+    expect(req.request.body).toEqual(null);
+    req.flush(null);
+  });
 });

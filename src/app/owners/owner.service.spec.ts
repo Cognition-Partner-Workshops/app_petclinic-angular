@@ -39,7 +39,6 @@ import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
 import { Type } from '@angular/core';
-import { defer } from 'rxjs';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -171,29 +170,18 @@ describe('OwnerService', () => {
     expect(req.request.body).toEqual(null);
   });
 
-  it('search for delete Owner', () => {
+  it('should handle error when getting owner by id', () => {
+    ownerService.getOwnerById(1).subscribe(
+      () => fail('expected an error, not owner'),
+      (errorMsg) => {
+        expect(errorMsg).toContain('404');
+      }
+    );
 
-    const errorResponse = new HttpErrorResponse({
-      error: '404 error',
-      status: 404,
-      statusText: 'Not Found'
-    });
-
-    httpClientSpy.get.and.returnValue(asyncError(errorResponse));
-
-    ownerService.getOwnerById(1).subscribe((owners) => {
-      fail('Should have failed with 404 error'),
-      (error: HttpErrorResponse) => {
-        expect(error.status).toEqual(404);
-        expect(error.error).toContain('404 error');
-      }});
-
-      const req = httpTestingController.expectOne(
-        { method: 'GET', url:ownerService.entityUrl + '/1' });
-
-    });
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '/1'
+    );
+    expect(req.request.method).toEqual('GET');
+    req.flush('404 error', { status: 404, statusText: 'Not Found' });
+  });
 });
-
-export function asyncError<T>(errorObject: any) {
-  return defer(() => Promise.reject(errorObject));
-}
