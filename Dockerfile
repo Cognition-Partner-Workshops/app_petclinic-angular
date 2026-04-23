@@ -1,6 +1,6 @@
 ARG DOCKER_HUB="docker.io"
-ARG NGINX_VERSION="1.17.6"
-ARG NODE_VERSION="16.3-alpine"
+ARG NGINX_VERSION="1.27-alpine"
+ARG NODE_VERSION="20-alpine"
 
 FROM $DOCKER_HUB/library/node:$NODE_VERSION as build
 
