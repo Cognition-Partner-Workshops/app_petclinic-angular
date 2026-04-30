@@ -47,20 +47,17 @@ describe('PetListComponent', () => {
   let petService: PetService;
   let spy: Spy;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [PetListComponent],
-        schemas: [CUSTOM_ELEMENTS_SCHEMA],
-        imports: [FormsModule],
-        providers: [
-          { provide: PetService, useClass: PetServiceStub },
-          { provide: Router, useClass: RouterStub },
-          { provide: ActivatedRoute, useClass: ActivatedRouteStub },
-        ],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      imports: [FormsModule, PetListComponent],
+      providers: [
+        { provide: PetService, useClass: PetServiceStub },
+        { provide: Router, useClass: RouterStub },
+        { provide: ActivatedRoute, useClass: ActivatedRouteStub },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PetListComponent);

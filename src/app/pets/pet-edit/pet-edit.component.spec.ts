@@ -23,25 +23,23 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
-import {PetEditComponent} from './pet-edit.component';
-import {FormsModule} from '@angular/forms';
-import {PetService} from '../pet.service';
-import {OwnerService} from '../../owners/owner.service';
-import {PetTypeService} from '../../pettypes/pettype.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
-import {Pet} from '../pet';
-import {Observable, of} from 'rxjs';
+import { PetEditComponent } from './pet-edit.component';
+import { FormsModule } from '@angular/forms';
+import { PetService } from '../pet.service';
+import { OwnerService } from '../../owners/owner.service';
+import { PetTypeService } from '../../pettypes/pettype.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
+import { Pet } from '../pet';
+import { Observable, of } from 'rxjs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import {MatMomentDateModule} from '@angular/material-moment-adapter';
-import {PetType} from '../../pettypes/pettype';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { PetType } from '../../pettypes/pettype';
 import Spy = jasmine.Spy;
 
-class OwnerServiceStub {
-
-}
+class OwnerServiceStub {}
 
 class PetServiceStub {
   updatePet(petId: string, pet: Pet): Observable<Pet> {
@@ -67,18 +65,21 @@ describe('PetEditComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [PetEditComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      imports: [FormsModule, MatDatepickerModule, MatMomentDateModule],
+      imports: [
+        FormsModule,
+        MatDatepickerModule,
+        MatMomentDateModule,
+        PetEditComponent,
+      ],
       providers: [
-        {provide: PetService, useClass: PetServiceStub},
-        {provide: OwnerService, useClass: OwnerServiceStub},
-        {provide: PetTypeService, useClass: PetTypeServiceStub},
-        {provide: Router, useClass: RouterStub},
-        {provide: ActivatedRoute, useClass: ActivatedRouteStub}
-      ]
-    })
-      .compileComponents();
+        { provide: PetService, useClass: PetServiceStub },
+        { provide: OwnerService, useClass: OwnerServiceStub },
+        { provide: PetTypeService, useClass: PetTypeServiceStub },
+        { provide: Router, useClass: RouterStub },
+        { provide: ActivatedRoute, useClass: ActivatedRouteStub },
+      ],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -88,7 +89,7 @@ describe('PetEditComponent', () => {
       id: 1,
       name: 'Leo',
       birthDate: '2010-09-07',
-      type: {id: 1, name: 'cat'},
+      type: { id: 1, name: 'cat' },
       ownerId: 1,
       owner: {
         id: 1,
@@ -97,13 +98,12 @@ describe('PetEditComponent', () => {
         address: '110 W. Liberty St.',
         city: 'Madison',
         telephone: '6085551023',
-        pets: null
+        pets: null,
       },
-      visits: null
+      visits: null,
     };
     petService = fixture.debugElement.injector.get(PetService);
-    spy = spyOn(petService, 'updatePet')
-      .and.returnValue(of(testPet));
+    spy = spyOn(petService, 'updatePet').and.returnValue(of(testPet));
 
     fixture.detectChanges();
   });

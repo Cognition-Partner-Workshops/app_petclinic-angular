@@ -50,37 +50,38 @@ describe('OwnerEditComponent', () => {
   let component: OwnerEditComponent;
   let fixture: ComponentFixture<OwnerEditComponent>;
   let router: Router;
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [OwnerEditComponent],
-        schemas: [CUSTOM_ELEMENTS_SCHEMA],
-        // schemas: [ NO_ERRORS_SCHEMA ],
-        imports: [FormsModule, RouterTestingModule.withRoutes([
-          { path: 'owners', component: OwnerListComponent}
-      ])],
-        providers: [
-          { provide: OwnerService, useClass: OwnserServiceStub },
-          { provide: Router, useClass: RouterStub },
-          { provide: ActivatedRoute, useClass: ActivatedRouteStub },
-        ],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      // schemas: [ NO_ERRORS_SCHEMA ],
+      imports: [
+        FormsModule,
+        RouterTestingModule.withRoutes([
+          { path: 'owners', component: OwnerListComponent },
+        ]),
+        OwnerEditComponent,
+      ],
+      providers: [
+        { provide: OwnerService, useClass: OwnserServiceStub },
+        { provide: Router, useClass: RouterStub },
+        { provide: ActivatedRoute, useClass: ActivatedRouteStub },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(OwnerEditComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    router=TestBed.get(Router);
-    spyOn(router,'navigate');
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
   });
 
   it('should create OwnerEditComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('back button routing', async() => {
+  it('back button routing', async () => {
     let buttons = fixture.debugElement.queryAll(By.css('button'));
     let backbutton = buttons[0];
     backbutton.triggerEventHandler('click', null);
@@ -88,7 +89,6 @@ describe('OwnerEditComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
   });
 
- 
   it('update owner', async(() => {
     let buttons = fixture.debugElement.queryAll(By.css('button'));
     let updateOwnerButton = buttons[1].nativeElement;
@@ -96,5 +96,4 @@ describe('OwnerEditComponent', () => {
     updateOwnerButton.click();
     expect(component.onSubmit).toHaveBeenCalled();
   }));
-
 });

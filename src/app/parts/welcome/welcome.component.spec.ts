@@ -18,14 +18,13 @@
 
 /* tslint:disable:no-unused-variable */
 
-
 /**
  * @author Vitaliy Fedoriv
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import {WelcomeComponent} from './welcome.component';
+import { WelcomeComponent } from './welcome.component';
 
 describe('WelcomeComponent', () => {
   let component: WelcomeComponent;
@@ -33,9 +32,8 @@ describe('WelcomeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [WelcomeComponent]
-    })
-      .compileComponents();
+      imports: [WelcomeComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

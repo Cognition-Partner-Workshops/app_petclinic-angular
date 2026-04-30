@@ -1,44 +1,56 @@
-import {Component, OnInit} from '@angular/core';
-import {PetType} from '../pettype';
-import {Router} from '@angular/router';
-import {PetTypeService} from '../pettype.service';
-import {Specialty} from '../../specialties/specialty';
+import { Component, OnInit, inject } from '@angular/core';
+import { PetType } from '../pettype';
+import { Router } from '@angular/router';
+import { PetTypeService } from '../pettype.service';
+import { Specialty } from '../../specialties/specialty';
 import { finalize } from 'rxjs/operators';
+import { FormsModule } from '@angular/forms';
+import { PettypeAddComponent } from '../pettype-add/pettype-add.component';
 
 @Component({
   selector: 'app-pettype-list',
   templateUrl: './pettype-list.component.html',
-  styleUrls: ['./pettype-list.component.css']
+  styleUrls: ['./pettype-list.component.css'],
+  imports: [FormsModule, PettypeAddComponent],
 })
 export class PettypeListComponent implements OnInit {
+  private pettypeService = inject(PetTypeService);
+  private router = inject(Router);
+
   pettypes: PetType[];
   errorMessage: string;
   responseStatus: number;
   isPetTypesDataReceived: boolean = false;
   isInsert = false;
 
-  constructor(private pettypeService: PetTypeService, private router: Router) {
+  constructor() {
     this.pettypes = [] as PetType[];
   }
 
   ngOnInit() {
-    this.pettypeService.getPetTypes().pipe(
-      finalize(() => {
-        this.isPetTypesDataReceived = true;
-      })
-    ).subscribe(
-      pettypes => this.pettypes = pettypes,
-      error => this.errorMessage = error as any
+    this.pettypeService
+      .getPetTypes()
+      .pipe(
+        finalize(() => {
+          this.isPetTypesDataReceived = true;
+        }),
+      )
+      .subscribe(
+        (pettypes) => (this.pettypes = pettypes),
+        (error) => (this.errorMessage = error as any),
       );
   }
 
   deletePettype(pettype: PetType) {
     this.pettypeService.deletePetType(pettype.id.toString()).subscribe(
-      response => {
+      (response) => {
         this.responseStatus = response;
-        this.pettypes = this.pettypes.filter(currentItem => !(currentItem.id === pettype.id));
+        this.pettypes = this.pettypes.filter(
+          (currentItem) => !(currentItem.id === pettype.id),
+        );
       },
-      error => this.errorMessage = error as any);
+      (error) => (this.errorMessage = error as any),
+    );
   }
 
   onNewPettype(newPetType: Specialty) {

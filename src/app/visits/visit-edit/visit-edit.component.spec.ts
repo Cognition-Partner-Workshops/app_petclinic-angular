@@ -23,21 +23,21 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
-import {VisitEditComponent} from './visit-edit.component';
-import {FormsModule} from '@angular/forms';
-import {VisitService} from '../visit.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
-import {Visit} from '../visit';
-import {Observable, of} from 'rxjs';
-import {Pet} from '../../pets/pet';
-import {MatMomentDateModule} from '@angular/material-moment-adapter';
+import { VisitEditComponent } from './visit-edit.component';
+import { FormsModule } from '@angular/forms';
+import { VisitService } from '../visit.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
+import { Visit } from '../visit';
+import { Observable, of } from 'rxjs';
+import { Pet } from '../../pets/pet';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
-import {OwnerService} from '../../owners/owner.service';
-import {PetService} from '../../pets/pet.service';
+import { OwnerService } from '../../owners/owner.service';
+import { PetService } from '../../pets/pet.service';
 
 class VisitServiceStub {
   getVisitById(visitId: string): Observable<Visit> {
@@ -45,8 +45,7 @@ class VisitServiceStub {
   }
 }
 
-class OwnerServiceStub {
-}
+class OwnerServiceStub {}
 
 class PetServiceStub {
   getPetById(petId: string): Observable<Pet> {
@@ -64,18 +63,21 @@ describe('VisitEditComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [VisitEditComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      imports: [FormsModule, MatDatepickerModule, MatMomentDateModule],
+      imports: [
+        FormsModule,
+        MatDatepickerModule,
+        MatMomentDateModule,
+        VisitEditComponent,
+      ],
       providers: [
-        {provide: VisitService, useClass: VisitServiceStub},
-        {provide: OwnerService, useClass: OwnerServiceStub},
-        {provide: PetService, useClass: PetServiceStub},
-        {provide: Router, useClass: RouterStub},
-        {provide: ActivatedRoute, useClass: ActivatedRouteStub}
-      ]
-    })
-      .compileComponents();
+        { provide: VisitService, useClass: VisitServiceStub },
+        { provide: OwnerService, useClass: OwnerServiceStub },
+        { provide: PetService, useClass: PetServiceStub },
+        { provide: Router, useClass: RouterStub },
+        { provide: ActivatedRoute, useClass: ActivatedRouteStub },
+      ],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -86,7 +88,7 @@ describe('VisitEditComponent', () => {
       ownerId: 1,
       name: 'Leo',
       birthDate: '2010-09-07',
-      type: {id: 1, name: 'cat'},
+      type: { id: 1, name: 'cat' },
       owner: {
         id: 1,
         firstName: 'George',
@@ -94,20 +96,19 @@ describe('VisitEditComponent', () => {
         address: '110 W. Liberty St.',
         city: 'Madison',
         telephone: '6085551023',
-        pets: null
+        pets: null,
       },
-      visits: null
+      visits: null,
     };
     testVisit = {
       id: 1,
       date: '2016-09-07',
       description: '',
-      pet: testPet
+      pet: testPet,
     };
 
     visitService = fixture.debugElement.injector.get(VisitService);
-    spy = spyOn(visitService, 'getVisitById')
-      .and.returnValue(of(testVisit));
+    spy = spyOn(visitService, 'getVisitById').and.returnValue(of(testVisit));
 
     fixture.detectChanges();
   });
