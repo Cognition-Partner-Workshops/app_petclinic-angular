@@ -20,25 +20,30 @@
  * @author Vitaliy Fedoriv
  */
 
-import {Component, OnInit} from '@angular/core';
-import {Visit} from '../visit';
-import {VisitService} from '../visit.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {PetService} from '../../pets/pet.service';
-import {Pet} from '../../pets/pet';
-import {PetType} from '../../pettypes/pettype';
-import {Owner} from '../../owners/owner';
+import { Component, OnInit, inject } from '@angular/core';
+import { Visit } from '../visit';
+import { VisitService } from '../visit.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { PetService } from '../../pets/pet.service';
+import { Pet } from '../../pets/pet';
+import { PetType } from '../../pettypes/pettype';
+import { Owner } from '../../owners/owner';
 
 import moment from 'moment';
-import {OwnerService} from '../../owners/owner.service';
+import { OwnerService } from '../../owners/owner.service';
 
 @Component({
-    selector: 'app-visit-add',
-    templateUrl: './visit-add.component.html',
-    styleUrls: ['./visit-add.component.css'],
-    standalone: false
+  selector: 'app-visit-add',
+  templateUrl: './visit-add.component.html',
+  styleUrls: ['./visit-add.component.css'],
+  standalone: false,
 })
 export class VisitAddComponent implements OnInit {
+  private visitService = inject(VisitService);
+  private petService = inject(PetService);
+  private ownerService = inject(OwnerService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   visit: Visit;
   currentPet: Pet;
@@ -47,33 +52,28 @@ export class VisitAddComponent implements OnInit {
   addedSuccess = false;
   errorMessage: string;
 
-  constructor(private visitService: VisitService,
-              private petService: PetService,
-              private ownerService: OwnerService,
-              private router: Router,
-              private route: ActivatedRoute) {
+
+  constructor() {
     this.visit = {} as Visit;
     this.currentPet = {} as Pet;
     this.currentOwner = {} as Owner;
     this.currentPetType = {} as PetType;
-
   }
 
   ngOnInit() {
     console.log(this.route.parent);
     const petId = this.route.snapshot.params.id;
     this.petService.getPetById(petId).subscribe(
-      pet => {
+      (pet) => {
         this.currentPet = pet;
         this.visit.pet = this.currentPet;
         this.currentPetType = this.currentPet.type;
-        this.ownerService.getOwnerById(pet.ownerId).subscribe(
-          owner => {
-            this.currentOwner = owner;
-          }
-        )
+        this.ownerService.getOwnerById(pet.ownerId).subscribe((owner) => {
+          this.currentOwner = owner;
+        });
       },
-      error => this.errorMessage = error as any);
+      (error) => (this.errorMessage = error as any),
+    );
   }
 
   onSubmit(visit: Visit) {
@@ -84,17 +84,16 @@ export class VisitAddComponent implements OnInit {
     visit.date = moment(visit.date).format('YYYY-MM-DD');
 
     this.visitService.addVisit(visit).subscribe(
-      newVisit => {
+      (newVisit) => {
         this.visit = newVisit;
         this.addedSuccess = true;
         that.gotoOwnerDetail();
       },
-      error => this.errorMessage = error as any
+      (error) => (this.errorMessage = error as any),
     );
   }
 
   gotoOwnerDetail() {
     this.router.navigate(['/owners', this.currentOwner.id]);
   }
-
 }
