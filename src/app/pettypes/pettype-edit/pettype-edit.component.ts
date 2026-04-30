@@ -26,6 +26,7 @@ import {PetTypeService} from '../pettype.service';
 import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
+  standalone: false,
   selector: 'app-pettype-edit',
   templateUrl: './pettype-edit.component.html',
   styleUrls: ['./pettype-edit.component.css']

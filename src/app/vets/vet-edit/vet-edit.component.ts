@@ -29,6 +29,7 @@ import {Specialty} from '../../specialties/specialty';
 import {FormBuilder, FormGroup, FormControl, Validators} from '@angular/forms';
 
 @Component({
+  standalone: false,
   selector: 'app-vet-edit',
   templateUrl: './vet-edit.component.html',
   styleUrls: ['./vet-edit.component.css']

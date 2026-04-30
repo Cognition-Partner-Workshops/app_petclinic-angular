@@ -27,6 +27,7 @@ import {Router} from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 @Component({
+  standalone: false,
   selector: 'app-specialty-list',
   templateUrl: './specialty-list.component.html',
   styleUrls: ['./specialty-list.component.css']

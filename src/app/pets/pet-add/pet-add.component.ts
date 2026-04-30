@@ -30,9 +30,10 @@ import {PetTypeService} from '../../pettypes/pettype.service';
 import {PetService} from '../pet.service';
 import {OwnerService} from '../../owners/owner.service';
 
-import * as moment from 'moment';
+import moment from 'moment';
 
 @Component({
+  standalone: false,
   selector: 'app-pet-add',
   templateUrl: './pet-add.component.html',
   styleUrls: ['./pet-add.component.css']
