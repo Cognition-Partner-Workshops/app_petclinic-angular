@@ -43,7 +43,10 @@
                   "maximumWarning": "6kb"
                 }
               ],
+              "optimization": true,
               "outputHashing": "all",
+              "sourceMap": false,
+              "extractLicenses": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
