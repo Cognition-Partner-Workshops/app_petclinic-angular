@@ -27,6 +27,7 @@ import {NavigationExtras} from '@angular/router';
 import {BehaviorSubject} from 'rxjs';
 
 @Directive({
+  standalone: false,
   selector: '[appRouterLink]',
 })
 export class RouterLinkStubDirective {
@@ -39,7 +40,7 @@ export class RouterLinkStubDirective {
   }
 }
 
-@Component({selector: 'app-router-outlet', template: ''})
+@Component({standalone: false, selector: 'app-router-outlet', template: ''})
 export class RouterOutletStubComponent {
 }
 

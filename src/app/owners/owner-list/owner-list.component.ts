@@ -27,6 +27,7 @@ import {Router} from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 @Component({
+  standalone: false,
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
   styleUrls: ['./owner-list.component.css']

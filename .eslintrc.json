@@ -10,10 +10,8 @@
       ],
       "parserOptions": {
         "project": [
-          "tsconfig.json",
-          "e2e/tsconfig.json"
-        ],
-        "createDefaultProgram": true
+          "tsconfig.json"
+        ]
       },
       "extends": [
         "plugin:@angular-eslint/recommended",
@@ -39,15 +37,8 @@
             "type": "attribute"
           }
         ],
-        // Note: you must disable the base rule as it can report incorrect errors
-        "quotes": "off",
-        "@typescript-eslint/quotes": [
-          "error",
-          "single",
-          {
-            "allowTemplateLiterals": true
-          }
-        ],
+        "@angular-eslint/prefer-standalone": "off",
+        "@angular-eslint/prefer-inject": "off",
         "@angular-eslint/no-empty-lifecycle-method": "off"
       }
     },
@@ -57,7 +48,10 @@
       ],
       "extends": [
         "plugin:@angular-eslint/template/recommended"
-      ]
+      ],
+      "rules": {
+        "@angular-eslint/template/prefer-control-flow": "off"
+      }
     }
   ]
 }

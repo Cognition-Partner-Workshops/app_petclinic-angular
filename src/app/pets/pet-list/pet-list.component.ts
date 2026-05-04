@@ -27,6 +27,7 @@ import {PetService} from '../pet.service';
 import {Pet} from '../pet';
 
 @Component({
+  standalone: false,
   selector: 'app-pet-list',
   templateUrl: './pet-list.component.html',
   styleUrls: ['./pet-list.component.css']
