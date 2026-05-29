@@ -55,7 +55,7 @@ export default function PetEditPage() {
         ...pet,
         name: getValue('name'),
         birthDate: getValue('birthDate'),
-        type: selectedType,
+        type: selectedType ?? pet?.type,
       });
     },
     onSuccess: () => {
