@@ -18,7 +18,7 @@ export default function VisitEditPage() {
   const navigate = useNavigate();
   const visitId = Number(id);
 
-  const { data: visit, isLoading: visitLoading } = useQuery({
+  const { data: visit, isLoading: visitLoading, error: visitError } = useQuery({
     queryKey: ['visit', visitId],
     queryFn: () => visitApi.getById(visitId),
   });
@@ -53,7 +53,7 @@ export default function VisitEditPage() {
         ...visit,
         date: getValue('date'),
         description: getValue('description'),
-        pet: pet,
+        pet: pet ?? visit?.pet,
       }),
     onSuccess: () => {
       if (owner) navigate(`/owners/${owner.id}`);
@@ -67,6 +67,7 @@ export default function VisitEditPage() {
   };
 
   if (visitLoading) return <CircularProgress />;
+  if (visitError || !visit) return <Alert severity="error">Failed to load visit.</Alert>;
 
   return (
     <>

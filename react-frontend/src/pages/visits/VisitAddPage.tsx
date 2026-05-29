@@ -19,7 +19,7 @@ export default function VisitAddPage() {
   const navigate = useNavigate();
   const petId = Number(id);
 
-  const { data: pet, isLoading: petLoading } = useQuery({
+  const { data: pet, isLoading: petLoading, error: petError } = useQuery({
     queryKey: ['pet', petId],
     queryFn: () => petApi.getById(petId),
   });
@@ -54,6 +54,7 @@ export default function VisitAddPage() {
   };
 
   if (petLoading) return <CircularProgress />;
+  if (petError || !pet) return <Alert severity="error">Failed to load pet.</Alert>;
 
   return (
     <>
