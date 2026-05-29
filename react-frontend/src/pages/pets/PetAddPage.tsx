@@ -97,7 +97,7 @@ export default function PetAddPage() {
           onChange={handleChange('typeId')}
         >
           {petTypes?.map((pt) => (
-            <MenuItem key={pt.id} value={pt.id}>
+            <MenuItem key={pt.id} value={pt.id.toString()}>
               {pt.name}
             </MenuItem>
           ))}

@@ -87,7 +87,7 @@ export default function VetAddPage() {
         >
           <MenuItem value="">None</MenuItem>
           {specialties?.map((s) => (
-            <MenuItem key={s.id} value={s.id}>
+            <MenuItem key={s.id} value={s.id.toString()}>
               {s.name}
             </MenuItem>
           ))}
