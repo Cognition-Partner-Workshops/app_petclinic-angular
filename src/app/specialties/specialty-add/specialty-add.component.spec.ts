@@ -1,74 +1,52 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { Specialty } from '../specialty';
-import { SpecialtyAddComponent } from './specialty-add.component';
-import { SpecialtyService } from '../specialty.service';
-import { FormsModule } from '@angular/forms';
-import { waitForAsync } from '@angular/core/testing';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
-import { Observable, of } from 'rxjs';
-import Spy = jasmine.Spy;
-
-class SpecialityServiceStub {
-  addSpecialty(specialty: Specialty): Observable<Specialty> {
-    return of();
-  }
-}
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {SpecialtyAddComponent} from './specialty-add.component';
+import {FormsModule} from '@angular/forms';
+import {SpecialtyService} from '../specialty.service';
+import {of, throwError} from 'rxjs';
+import {Specialty} from '../specialty';
 
 describe('SpecialtyAddComponent', () => {
   let component: SpecialtyAddComponent;
   let fixture: ComponentFixture<SpecialtyAddComponent>;
-  let specialtyService: SpecialtyService;
-  let spy: Spy;
-  let testSpecialty: Specialty;
+  let mockSpecialtyService: jasmine.SpyObj<SpecialtyService>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [SpecialtyAddComponent],
-        schemas: [CUSTOM_ELEMENTS_SCHEMA],
-        imports: [FormsModule],
-        providers: [
-          { provide: SpecialtyService, useClass: SpecialityServiceStub },
-          { provide: Router, useClass: RouterStub },
-          { provide: ActivatedRoute, useClass: ActivatedRouteStub },
-        ],
-      }).compileComponents();
-    })
-  );
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [SpecialtyAddComponent],
-        schemas: [CUSTOM_ELEMENTS_SCHEMA],
-        imports: [FormsModule],
-        providers: [
-          { provide: SpecialtyService, useClass: SpecialityServiceStub },
-          { provide: Router, useClass: RouterStub },
-          { provide: ActivatedRoute, useClass: ActivatedRouteStub },
-        ],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    mockSpecialtyService = jasmine.createSpyObj('SpecialtyService', ['addSpecialty']);
+
+    TestBed.configureTestingModule({
+      declarations: [SpecialtyAddComponent],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      imports: [FormsModule],
+      providers: [
+        {provide: SpecialtyService, useValue: mockSpecialtyService}
+      ]
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SpecialtyAddComponent);
     component = fixture.componentInstance;
-    testSpecialty = {
-      id: 1,
-      name: 'test',
-    };
-
-    specialtyService = fixture.debugElement.injector.get(SpecialtyService);
-    spy = spyOn(specialtyService, 'addSpecialty').and.returnValue(
-      of(testSpecialty)
-    );
-
     fixture.detectChanges();
   });
 
-  it('should create SpecialtyAddComponent', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should submit specialty and emit event', () => {
+    const newSpec: Specialty = {id: 1, name: 'radiology'};
+    mockSpecialtyService.addSpecialty.and.returnValue(of(newSpec));
+    spyOn(component.newSpeciality, 'emit');
+    component.onSubmit({id: null, name: 'radiology'});
+    expect(component.speciality).toEqual(newSpec);
+    expect(component.addedSuccess).toBe(true);
+    expect(component.newSpeciality.emit).toHaveBeenCalledWith(newSpec);
+  });
+
+  it('should handle submit error', () => {
+    mockSpecialtyService.addSpecialty.and.returnValue(throwError('error'));
+    component.onSubmit({id: null, name: 'test'});
+    expect(component.errorMessage).toBe('error');
   });
 });

@@ -1,81 +1,73 @@
-/*
- *
- *  * Copyright 2017-2018 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
-
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-import {Specialty} from '../specialty';
 import {SpecialtyEditComponent} from './specialty-edit.component';
-import {SpecialtyService} from '../specialty.service';
 import {FormsModule} from '@angular/forms';
+import {SpecialtyService} from '../specialty.service';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
-import {Observable, of} from 'rxjs';
-import Spy = jasmine.Spy;
-
-class SpecialityServiceStub {
-  getSpecialtyById(specId: string): Observable<Specialty> {
-    return of();
-  }
-}
+import {of, throwError} from 'rxjs';
+import {Specialty} from '../specialty';
 
 describe('SpecialtyEditComponent', () => {
   let component: SpecialtyEditComponent;
   let fixture: ComponentFixture<SpecialtyEditComponent>;
-  let specialtyService: SpecialtyService;
-  let spy: Spy;
-  let testSpecialty: Specialty;
+  let mockSpecialtyService: jasmine.SpyObj<SpecialtyService>;
+  let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(waitForAsync(() => {
+    mockSpecialtyService = jasmine.createSpyObj('SpecialtyService', ['getSpecialtyById', 'updateSpecialty']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
+    mockSpecialtyService.getSpecialtyById.and.returnValue(of({id: 1, name: 'radiology'}));
+
     TestBed.configureTestingModule({
       declarations: [SpecialtyEditComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       imports: [FormsModule],
       providers: [
-        {provide: SpecialtyService, useClass: SpecialityServiceStub},
-        {provide: Router, useClass: RouterStub},
-        {provide: ActivatedRoute, useClass: ActivatedRouteStub}
+        {provide: SpecialtyService, useValue: mockSpecialtyService},
+        {provide: Router, useValue: mockRouter},
+        {provide: ActivatedRoute, useValue: {snapshot: {params: {id: '1'}}}}
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SpecialtyEditComponent);
     component = fixture.componentInstance;
-    testSpecialty = {
-      id: 1,
-      name: 'test'
-    };
-
-    specialtyService = fixture.debugElement.injector.get(SpecialtyService);
-    spy = spyOn(specialtyService, 'getSpecialtyById')
-      .and.returnValue(of(testSpecialty));
-
     fixture.detectChanges();
   });
 
-  it('should create SpecialtyEditComponent', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should load specialty on init', () => {
+    expect(mockSpecialtyService.getSpecialtyById).toHaveBeenCalledWith('1');
+    expect(component.specialty).toEqual({id: 1, name: 'radiology'});
+  });
+
+  it('should handle error loading specialty', () => {
+    mockSpecialtyService.getSpecialtyById.and.returnValue(throwError('load error'));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('load error');
+  });
+
+  it('should submit updated specialty', () => {
+    const spec: Specialty = {id: 1, name: 'updated'};
+    mockSpecialtyService.updateSpecialty.and.returnValue(of(spec));
+    component.onSubmit(spec);
+    expect(mockSpecialtyService.updateSpecialty).toHaveBeenCalledWith('1', spec);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/specialties']);
+  });
+
+  it('should handle submit error', () => {
+    mockSpecialtyService.updateSpecialty.and.returnValue(throwError('update error'));
+    component.onSubmit({id: 1, name: 'test'});
+    expect(component.errorMessage).toBe('update error');
+  });
+
+  it('should navigate back', () => {
+    component.onBack();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/specialties']);
   });
 });

@@ -1,44 +1,39 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
-
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-
 import {VetEditComponent} from './vet-edit.component';
-import {FormsModule} from '@angular/forms';
+import {ReactiveFormsModule, FormsModule} from '@angular/forms';
+import {VetService} from '../vet.service';
+import {SpecialtyService} from '../../specialties/specialty.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {of, throwError} from 'rxjs';
+import {Vet} from '../vet';
+import {MatSelectModule} from '@angular/material/select';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('VetEditComponent', () => {
   let component: VetEditComponent;
   let fixture: ComponentFixture<VetEditComponent>;
+  let mockVetService: jasmine.SpyObj<VetService>;
+  let mockRouter: jasmine.SpyObj<Router>;
+
+  const mockVet: Vet = {id: 1, firstName: 'James', lastName: 'Carter', specialties: [{id: 1, name: 'radiology'}]};
+  const mockSpecs = [{id: 1, name: 'radiology'}, {id: 2, name: 'surgery'}];
 
   beforeEach(waitForAsync(() => {
+    mockVetService = jasmine.createSpyObj('VetService', ['updateVet']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
     TestBed.configureTestingModule({
       declarations: [VetEditComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      imports: [FormsModule]
-    })
-      .compileComponents();
+      imports: [FormsModule, ReactiveFormsModule, MatSelectModule, NoopAnimationsModule],
+      providers: [
+        {provide: VetService, useValue: mockVetService},
+        {provide: SpecialtyService, useValue: {}},
+        {provide: Router, useValue: mockRouter},
+        {provide: ActivatedRoute, useValue: {snapshot: {data: {vet: mockVet, specs: mockSpecs}}}}
+      ]
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -46,8 +41,38 @@ describe('VetEditComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
-// TODO complete test
-  // it('should create', () => {
-  //   expect(component).toBeTruthy();
-  // });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should initialize form with vet data', () => {
+    expect(component.firstNameCtrl.value).toBe('James');
+    expect(component.lastNameCtrl.value).toBe('Carter');
+    expect(component.specList.length).toBe(2);
+  });
+
+  it('should submit updated vet', () => {
+    mockVetService.updateVet.and.returnValue(of(mockVet));
+    component.onSubmit(mockVet);
+    expect(mockVetService.updateVet).toHaveBeenCalledWith('1', mockVet);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/vets']);
+  });
+
+  it('should handle submit error', () => {
+    mockVetService.updateVet.and.returnValue(throwError('update error'));
+    component.onSubmit(mockVet);
+    expect(component.errorMessage).toBe('update error');
+  });
+
+  it('should compare specialties correctly', () => {
+    expect(component.compareSpecFn({id: 1, name: 'a'}, {id: 1, name: 'b'})).toBe(true);
+    expect(component.compareSpecFn({id: 1, name: 'a'}, {id: 2, name: 'a'})).toBe(false);
+    expect(component.compareSpecFn(null, null)).toBe(true);
+  });
+
+  it('should navigate to vet list', () => {
+    component.gotoVetList();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/vets']);
+  });
 });

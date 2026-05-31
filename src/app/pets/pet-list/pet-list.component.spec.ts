@@ -1,101 +1,65 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
-
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-
-import { PetListComponent } from './pet-list.component';
-import { FormsModule } from '@angular/forms';
-import { PetService } from '../pet.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
-import { Pet } from '../pet';
-import { Observable, of } from 'rxjs';
-import Spy = jasmine.Spy;
-
-class PetServiceStub {
-  deletePet(petId: string): Observable<number> {
-    return of();
-  }
-}
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {PetListComponent} from './pet-list.component';
+import {PetService} from '../pet.service';
+import {Router} from '@angular/router';
+import {of, throwError} from 'rxjs';
+import {Pet} from '../pet';
 
 describe('PetListComponent', () => {
   let component: PetListComponent;
   let fixture: ComponentFixture<PetListComponent>;
-  let inputPet: Pet;
-  let petService: PetService;
-  let spy: Spy;
+  let mockPetService: jasmine.SpyObj<PetService>;
+  let mockRouter: jasmine.SpyObj<Router>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [PetListComponent],
-        schemas: [CUSTOM_ELEMENTS_SCHEMA],
-        imports: [FormsModule],
-        providers: [
-          { provide: PetService, useClass: PetServiceStub },
-          { provide: Router, useClass: RouterStub },
-          { provide: ActivatedRoute, useClass: ActivatedRouteStub },
-        ],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    mockPetService = jasmine.createSpyObj('PetService', ['deletePet']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
+    TestBed.configureTestingModule({
+      declarations: [PetListComponent],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      providers: [
+        {provide: PetService, useValue: mockPetService},
+        {provide: Router, useValue: mockRouter}
+      ]
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PetListComponent);
     component = fixture.componentInstance;
-    inputPet = {
-      id: 1,
-      name: 'Leo',
-      birthDate: '2010-09-07',
-      type: { id: 1, name: 'cat' },
-      ownerId: 1,
-      owner: {
-        id: 1,
-        firstName: 'George',
-        lastName: 'Franklin',
-        address: '110 W. Liberty St.',
-        city: 'Madison',
-        telephone: '6085551023',
-        pets: null,
-      },
-      visits: null,
-    };
-    component.pet = inputPet;
-    petService = fixture.debugElement.injector.get(PetService);
-    spy = spyOn(petService, 'deletePet').and.returnValue(of(1));
-
+    component.pet = {id: 1, name: 'Leo', birthDate: '2020-01-01', type: {id: 1, name: 'cat'}, owner: null, ownerId: 1, visits: []};
     fixture.detectChanges();
   });
 
-  it('should create PetListComponent', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call deletePet() method', () => {
-    fixture.detectChanges();
-    component.deletePet(component.pet);
-    expect(spy.calls.any()).toBe(true, 'deletePet called');
+  it('should navigate to edit pet', () => {
+    const pet: Pet = {id: 1, name: 'Leo', birthDate: '', type: null, owner: null, ownerId: 1, visits: []};
+    component.editPet(pet);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pets', 1, 'edit']);
+  });
+
+  it('should delete pet successfully', () => {
+    const pet: Pet = {id: 1, name: 'Leo', birthDate: '', type: null, owner: null, ownerId: 1, visits: []};
+    mockPetService.deletePet.and.returnValue(of(0));
+    component.deletePet(pet);
+    expect(component.deleteSuccess).toBe(true);
+  });
+
+  it('should handle delete error', () => {
+    const pet: Pet = {id: 1, name: 'Leo', birthDate: '', type: null, owner: null, ownerId: 1, visits: []};
+    mockPetService.deletePet.and.returnValue(throwError('delete error'));
+    component.deletePet(pet);
+    expect(component.errorMessage).toBe('delete error');
+  });
+
+  it('should navigate to add visit', () => {
+    const pet: Pet = {id: 1, name: 'Leo', birthDate: '', type: null, owner: null, ownerId: 1, visits: []};
+    component.addVisit(pet);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pets', 1, 'visits', 'add']);
   });
 });

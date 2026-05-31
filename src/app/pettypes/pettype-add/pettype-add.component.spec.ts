@@ -1,58 +1,51 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
-import {PettypeAddComponent} from './pettype-add.component';
-import {PetTypeService} from '../pettype.service';
-import {PetType} from '../pettype';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
+import {PettypeAddComponent} from './pettype-add.component';
 import {FormsModule} from '@angular/forms';
-import {Observable, of} from 'rxjs';
-import Spy = jasmine.Spy;
-
-class PetTypeServiceStub {
-  addPetType(petType: PetType): Observable<PetType> {
-    return of();
-  }
-}
+import {PetTypeService} from '../pettype.service';
+import {of, throwError} from 'rxjs';
+import {PetType} from '../pettype';
 
 describe('PettypeAddComponent', () => {
   let component: PettypeAddComponent;
   let fixture: ComponentFixture<PettypeAddComponent>;
-  let pettypeService: PetTypeService;
-  let spy: Spy;
-  let testPettype: PetType;
+  let mockPetTypeService: jasmine.SpyObj<PetTypeService>;
 
   beforeEach(waitForAsync(() => {
+    mockPetTypeService = jasmine.createSpyObj('PetTypeService', ['addPetType']);
+
     TestBed.configureTestingModule({
-      declarations: [ PettypeAddComponent ],
+      declarations: [PettypeAddComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       imports: [FormsModule],
       providers: [
-        {provide: PetTypeService, useClass: PetTypeServiceStub},
-        {provide: Router, useClass: RouterStub},
-        {provide: ActivatedRoute, useClass: ActivatedRouteStub}
+        {provide: PetTypeService, useValue: mockPetTypeService}
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PettypeAddComponent);
     component = fixture.componentInstance;
-    testPettype = {
-      id: 1,
-      name: 'test'
-    };
-
-    pettypeService = fixture.debugElement.injector.get(PetTypeService);
-    spy = spyOn(pettypeService, 'addPetType')
-      .and.returnValue(of(testPettype));
-
     fixture.detectChanges();
   });
 
-  it('should create PettypeAddComponent', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should submit pettype and emit event', () => {
+    const newType: PetType = {id: 1, name: 'bird'};
+    mockPetTypeService.addPetType.and.returnValue(of(newType));
+    spyOn(component.newPetType, 'emit');
+    component.onSubmit({id: null, name: 'bird'});
+    expect(component.pettype).toEqual(newType);
+    expect(component.newPetType.emit).toHaveBeenCalledWith(newType);
+  });
+
+  it('should handle submit error', () => {
+    mockPetTypeService.addPetType.and.returnValue(throwError('error'));
+    component.onSubmit({id: null, name: 'test'});
+    expect(component.errorMessage).toBe('error');
   });
 });

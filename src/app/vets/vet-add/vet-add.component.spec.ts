@@ -1,44 +1,38 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
-
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-
 import {VetAddComponent} from './vet-add.component';
 import {FormsModule} from '@angular/forms';
+import {VetService} from '../vet.service';
+import {SpecialtyService} from '../../specialties/specialty.service';
+import {Router} from '@angular/router';
+import {of, throwError} from 'rxjs';
+import {Vet} from '../vet';
+import {Specialty} from '../../specialties/specialty';
 
 describe('VetAddComponent', () => {
   let component: VetAddComponent;
   let fixture: ComponentFixture<VetAddComponent>;
+  let mockVetService: jasmine.SpyObj<VetService>;
+  let mockSpecialtyService: jasmine.SpyObj<SpecialtyService>;
+  let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(waitForAsync(() => {
+    mockVetService = jasmine.createSpyObj('VetService', ['addVet']);
+    mockSpecialtyService = jasmine.createSpyObj('SpecialtyService', ['getSpecialties']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
+    mockSpecialtyService.getSpecialties.and.returnValue(of([{id: 1, name: 'radiology'}]));
+
     TestBed.configureTestingModule({
       declarations: [VetAddComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      imports: [FormsModule]
-    })
-      .compileComponents();
+      imports: [FormsModule],
+      providers: [
+        {provide: VetService, useValue: mockVetService},
+        {provide: SpecialtyService, useValue: mockSpecialtyService},
+        {provide: Router, useValue: mockRouter}
+      ]
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -46,8 +40,49 @@ describe('VetAddComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
-// TODO complete test
-//   it('should create', () => {
-//     expect(component).toBeTruthy();
-//   });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should load specialties on init', () => {
+    expect(mockSpecialtyService.getSpecialties).toHaveBeenCalled();
+    expect(component.specialtiesList.length).toBe(1);
+  });
+
+  it('should handle error loading specialties', () => {
+    mockSpecialtyService.getSpecialties.and.returnValue(throwError('error'));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('error');
+  });
+
+  it('should submit vet without specialty', () => {
+    const newVet: Vet = {id: 1, firstName: 'John', lastName: 'Doe', specialties: []};
+    mockVetService.addVet.and.returnValue(of(newVet));
+    component.selectedSpecialty = {} as Specialty;
+    component.onSubmit({id: null, firstName: 'John', lastName: 'Doe', specialties: []} as Vet);
+    expect(mockVetService.addVet).toHaveBeenCalled();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/vets']);
+  });
+
+  it('should submit vet with specialty', () => {
+    const spec: Specialty = {id: 1, name: 'radiology'};
+    const newVet: Vet = {id: 1, firstName: 'John', lastName: 'Doe', specialties: [spec]};
+    mockVetService.addVet.and.returnValue(of(newVet));
+    component.selectedSpecialty = spec;
+    component.onSubmit({id: null, firstName: 'John', lastName: 'Doe', specialties: []} as Vet);
+    expect(mockVetService.addVet).toHaveBeenCalled();
+  });
+
+  it('should handle submit error', () => {
+    mockVetService.addVet.and.returnValue(throwError('submit error'));
+    component.selectedSpecialty = {} as Specialty;
+    component.onSubmit({id: null, firstName: 'John', lastName: 'Doe', specialties: []} as Vet);
+    expect(component.errorMessage).toBe('submit error');
+  });
+
+  it('should navigate to vet list', () => {
+    component.gotoVetList();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/vets']);
+  });
 });

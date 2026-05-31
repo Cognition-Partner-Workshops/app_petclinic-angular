@@ -1,114 +1,71 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
-
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-
 import {VisitListComponent} from './visit-list.component';
-import {FormsModule} from '@angular/forms';
 import {VisitService} from '../visit.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
+import {Router} from '@angular/router';
+import {of, throwError} from 'rxjs';
 import {Visit} from '../visit';
-import {Pet} from '../../pets/pet';
-import {Observable, of} from 'rxjs';
-import Spy = jasmine.Spy;
-
-class VisitServiceStub {
-  deleteVisit(visitId: string): Observable<number> {
-    return of();
-  }
-}
 
 describe('VisitListComponent', () => {
   let component: VisitListComponent;
   let fixture: ComponentFixture<VisitListComponent>;
-  let visitService: VisitService;
-  let testVisits: Visit[];
-  let testPet: Pet;
-  let spy: Spy;
-  let responseStatus: number;
+  let mockVisitService: jasmine.SpyObj<VisitService>;
+  let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(waitForAsync(() => {
+    mockVisitService = jasmine.createSpyObj('VisitService', ['deleteVisit']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
     TestBed.configureTestingModule({
       declarations: [VisitListComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      imports: [FormsModule],
       providers: [
-        {provide: VisitService, useClass: VisitServiceStub},
-        {provide: Router, useClass: RouterStub},
-        {provide: ActivatedRoute, useClass: ActivatedRouteStub}
+        {provide: VisitService, useValue: mockVisitService},
+        {provide: Router, useValue: mockRouter}
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(VisitListComponent);
     component = fixture.componentInstance;
-    testPet = {
-      id: 1,
-      name: 'Leo',
-      birthDate: '2010-09-07',
-      type: {id: 1, name: 'cat'},
-      ownerId: 1,
-      owner: {
-        id: 1,
-        firstName: 'George',
-        lastName: 'Franklin',
-        address: '110 W. Liberty St.',
-        city: 'Madison',
-        telephone: '6085551023',
-        pets: null
-      },
-      visits: null
-    };
-    testVisits =  [{
-      id: 1,
-      date: '2016-09-07',
-      description: '',
-      pet: testPet
-    }];
-
-    visitService = fixture.debugElement.injector.get(VisitService);
-    responseStatus = 204; // success delete return NO_CONTENT
-    component.visits = testVisits;
-
-    spy = spyOn(visitService, 'deleteVisit')
-      .and.returnValue(of(responseStatus));
-
     fixture.detectChanges();
   });
 
-  it('should create VisitListComponent', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call deleteVisit() method', () => {
-    fixture.detectChanges();
-    component.deleteVisit(component.visits[0]);
-    expect(spy.calls.any()).toBe(true, 'deleteVisit called');
+  it('should edit visit', () => {
+    const visit: Visit = {id: 1, date: '2020-01-01', description: 'test', pet: null};
+    component.editVisit(visit);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/visits', 1, 'edit']);
   });
 
+  it('should delete visit and remove from list', () => {
+    const visit: Visit = {id: 1, date: '2020-01-01', description: 'test', pet: null};
+    component.visits = [visit];
+    mockVisitService.deleteVisit.and.returnValue(of(0));
+    component.deleteVisit(visit);
+    expect(component.visits.length).toBe(0);
+    expect(component.noVisits).toBe(true);
+  });
+
+  it('should delete visit but keep others', () => {
+    const visit1: Visit = {id: 1, date: '2020-01-01', description: 'test1', pet: null};
+    const visit2: Visit = {id: 2, date: '2020-01-02', description: 'test2', pet: null};
+    component.visits = [visit1, visit2];
+    mockVisitService.deleteVisit.and.returnValue(of(0));
+    component.deleteVisit(visit1);
+    expect(component.visits.length).toBe(1);
+    expect(component.noVisits).toBe(false);
+  });
+
+  it('should handle delete error', () => {
+    const visit: Visit = {id: 1, date: '2020-01-01', description: 'test', pet: null};
+    component.visits = [visit];
+    mockVisitService.deleteVisit.and.returnValue(throwError('delete error'));
+    component.deleteVisit(visit);
+    expect(component.errorMessage).toBe('delete error');
+  });
 });

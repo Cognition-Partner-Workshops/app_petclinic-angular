@@ -1,59 +1,73 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
-import {PettypeEditComponent} from './pettype-edit.component';
-import {PetTypeService} from '../pettype.service';
-import {PetType} from '../pettype';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
+import {PettypeEditComponent} from './pettype-edit.component';
 import {FormsModule} from '@angular/forms';
-import {Observable, of} from 'rxjs/index';
-import Spy = jasmine.Spy;
-
-class PetTypeServiceStub {
-  getPetTypeById(typeId: string): Observable<PetType> {
-    return of();
-  }
-}
-
+import {PetTypeService} from '../pettype.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {of, throwError} from 'rxjs';
+import {PetType} from '../pettype';
 
 describe('PettypeEditComponent', () => {
   let component: PettypeEditComponent;
   let fixture: ComponentFixture<PettypeEditComponent>;
-  let pettypeService: PetTypeService;
-  let spy: Spy;
-  let testPettype: PetType;
+  let mockPetTypeService: jasmine.SpyObj<PetTypeService>;
+  let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(waitForAsync(() => {
+    mockPetTypeService = jasmine.createSpyObj('PetTypeService', ['getPetTypeById', 'updatePetType']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
+    mockPetTypeService.getPetTypeById.and.returnValue(of({id: 1, name: 'cat'}));
+
     TestBed.configureTestingModule({
-      declarations: [ PettypeEditComponent ],
+      declarations: [PettypeEditComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       imports: [FormsModule],
       providers: [
-        {provide: PetTypeService, useClass: PetTypeServiceStub},
-        {provide: Router, useClass: RouterStub},
-        {provide: ActivatedRoute, useClass: ActivatedRouteStub}
+        {provide: PetTypeService, useValue: mockPetTypeService},
+        {provide: Router, useValue: mockRouter},
+        {provide: ActivatedRoute, useValue: {snapshot: {params: {id: '1'}}}}
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PettypeEditComponent);
     component = fixture.componentInstance;
-    testPettype = {
-      id: 1,
-      name: 'test'
-    };
-
-    pettypeService = fixture.debugElement.injector.get(PetTypeService);
-    spy = spyOn(pettypeService, 'getPetTypeById')
-      .and.returnValue(of(testPettype));
-
     fixture.detectChanges();
   });
 
-  it('should create PettypeEditComponent', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should load pet type on init', () => {
+    expect(mockPetTypeService.getPetTypeById).toHaveBeenCalledWith('1');
+    expect(component.pettype).toEqual({id: 1, name: 'cat'});
+  });
+
+  it('should handle error loading pet type', () => {
+    mockPetTypeService.getPetTypeById.and.returnValue(throwError('load error'));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('load error');
+  });
+
+  it('should submit updated pet type', () => {
+    const pt: PetType = {id: 1, name: 'updated'};
+    mockPetTypeService.updatePetType.and.returnValue(of(pt));
+    component.onSubmit(pt);
+    expect(mockPetTypeService.updatePetType).toHaveBeenCalledWith('1', pt);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pettypes']);
+  });
+
+  it('should handle submit error', () => {
+    mockPetTypeService.updatePetType.and.returnValue(throwError('update error'));
+    component.onSubmit({id: 1, name: 'test'});
+    expect(component.errorMessage).toBe('update error');
+  });
+
+  it('should navigate back', () => {
+    component.onBack();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pettypes']);
   });
 });

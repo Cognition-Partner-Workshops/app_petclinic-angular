@@ -1,73 +1,88 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {PettypeListComponent} from './pettype-list.component';
 import {PetTypeService} from '../pettype.service';
+import {Router} from '@angular/router';
+import {of, throwError} from 'rxjs';
 import {PetType} from '../pettype';
-import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
 import {FormsModule} from '@angular/forms';
-import {Observable, of} from 'rxjs/index';
-import Spy = jasmine.Spy;
-
-class PetTypeServiceStub {
-  deletePetType(typeId: string): Observable<number> {
-    return of();
-  }
-  getPetTypes(): Observable<PetType[]> {
-    return of();
-  }
-}
-
 
 describe('PettypeListComponent', () => {
   let component: PettypeListComponent;
   let fixture: ComponentFixture<PettypeListComponent>;
-  let pettypeService: PetTypeService;
-  let spy: Spy;
-  let testPettypes: PetType[];
-  let responseStatus: number;
+  let mockPetTypeService: jasmine.SpyObj<PetTypeService>;
+  let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(waitForAsync(() => {
+    mockPetTypeService = jasmine.createSpyObj('PetTypeService', ['getPetTypes', 'deletePetType']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
+    mockPetTypeService.getPetTypes.and.returnValue(of([{id: 1, name: 'cat'}, {id: 2, name: 'dog'}]));
+
     TestBed.configureTestingModule({
-      declarations: [ PettypeListComponent ],
+      declarations: [PettypeListComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       imports: [FormsModule],
       providers: [
-        {provide: PetTypeService, useClass: PetTypeServiceStub},
-        {provide: Router, useClass: RouterStub},
-        {provide: ActivatedRoute, useClass: ActivatedRouteStub}
+        {provide: PetTypeService, useValue: mockPetTypeService},
+        {provide: Router, useValue: mockRouter}
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PettypeListComponent);
     component = fixture.componentInstance;
-
-    testPettypes = [{
-      id: 1,
-      name: 'test'
-    }];
-
-    pettypeService = fixture.debugElement.injector.get(PetTypeService);
-    responseStatus = 204; // success delete return NO_CONTENT
-    component.pettypes = testPettypes;
-
-    spy = spyOn(pettypeService, 'deletePetType')
-      .and.returnValue(of(responseStatus));
-
     fixture.detectChanges();
   });
 
-  it('should create PettypeListComponent', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call deletePetType() method', () => {
-    fixture.detectChanges();
-    component.deletePettype(component.pettypes[0]);
-    expect(spy.calls.any()).toBe(true, 'deletePetType called');
+  it('should load pet types on init', () => {
+    expect(component.pettypes.length).toBe(2);
+    expect(component.isPetTypesDataReceived).toBe(true);
+  });
+
+  it('should handle error loading pet types', () => {
+    mockPetTypeService.getPetTypes.and.returnValue(throwError('load error'));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('load error');
+    expect(component.isPetTypesDataReceived).toBe(true);
+  });
+
+  it('should delete pet type', () => {
+    mockPetTypeService.deletePetType.and.returnValue(of(0));
+    component.deletePettype({id: 1, name: 'cat'});
+    expect(component.pettypes.length).toBe(1);
+    expect(component.pettypes[0].name).toBe('dog');
+  });
+
+  it('should handle delete error', () => {
+    mockPetTypeService.deletePetType.and.returnValue(throwError('delete error'));
+    component.deletePettype({id: 1, name: 'cat'});
+    expect(component.errorMessage).toBe('delete error');
+  });
+
+  it('should add new pet type to list', () => {
+    component.onNewPettype({id: 3, name: 'bird'});
+    expect(component.pettypes.length).toBe(3);
+  });
+
+  it('should toggle add component', () => {
+    expect(component.isInsert).toBe(false);
+    component.showAddPettypeComponent();
+    expect(component.isInsert).toBe(true);
+  });
+
+  it('should navigate to edit pet type', () => {
+    component.showEditPettypeComponent({id: 1, name: 'cat'});
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pettypes', '1', 'edit']);
+  });
+
+  it('should navigate to home', () => {
+    component.gotoHome();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/welcome']);
   });
 });

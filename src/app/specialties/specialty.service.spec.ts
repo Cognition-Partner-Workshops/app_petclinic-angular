@@ -1,42 +1,75 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
-
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { inject, TestBed, waitForAsync } from '@angular/core/testing';
-import {SpecialtyService} from './specialty.service';
-import {HttpClient} from '@angular/common/http';
+import {TestBed} from '@angular/core/testing';
 import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
+import {SpecialtyService} from './specialty.service';
+import {HttpErrorHandler} from '../error.service';
+import {Specialty} from './specialty';
+import {environment} from '../../environments/environment';
 
 describe('SpecialtyService', () => {
+  let service: SpecialtyService;
+  let httpMock: HttpTestingController;
+  const baseUrl = environment.REST_API_URL + 'specialties';
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // Import the HttpClient mocking services
       imports: [HttpClientTestingModule],
-      providers: [SpecialtyService]
+      providers: [SpecialtyService, HttpErrorHandler]
     });
+    service = TestBed.inject(SpecialtyService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('should ...', waitForAsync(inject([HttpTestingController], (specialtyService: SpecialtyService, http: HttpClient) => {
-    expect(specialtyService).toBeTruthy();
-  })));
+  afterEach(() => httpMock.verify());
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('should get all specialties', () => {
+    const mock: Specialty[] = [{id: 1, name: 'radiology'}];
+    service.getSpecialties().subscribe(s => expect(s).toEqual(mock));
+    const req = httpMock.expectOne(baseUrl);
+    expect(req.request.method).toBe('GET');
+    req.flush(mock);
+  });
+
+  it('should get specialty by id', () => {
+    const mock: Specialty = {id: 1, name: 'radiology'};
+    service.getSpecialtyById('1').subscribe(s => expect(s).toEqual(mock));
+    const req = httpMock.expectOne(baseUrl + '/1');
+    expect(req.request.method).toBe('GET');
+    req.flush(mock);
+  });
+
+  it('should add a specialty', () => {
+    const mock: Specialty = {id: null, name: 'surgery'};
+    service.addSpecialty(mock).subscribe(s => expect(s).toEqual(mock));
+    const req = httpMock.expectOne(baseUrl);
+    expect(req.request.method).toBe('POST');
+    req.flush(mock);
+  });
+
+  it('should update a specialty', () => {
+    const mock: Specialty = {id: 1, name: 'updated'};
+    service.updateSpecialty('1', mock).subscribe(s => expect(s).toEqual(mock));
+    const req = httpMock.expectOne(baseUrl + '/1');
+    expect(req.request.method).toBe('PUT');
+    req.flush(mock);
+  });
+
+  it('should delete a specialty', () => {
+    service.deleteSpecialty('1').subscribe(r => expect(r).toBe(0));
+    const req = httpMock.expectOne(baseUrl + '/1');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(0);
+  });
+
+  it('should handle error on getSpecialties', () => {
+    service.getSpecialties().subscribe({
+      next: () => fail('should error'),
+      error: err => expect(err).toContain('server returned code 500')
+    });
+    const req = httpMock.expectOne(baseUrl);
+    req.flush('error', {status: 500, statusText: 'Server Error'});
+  });
 });

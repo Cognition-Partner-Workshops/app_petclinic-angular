@@ -171,6 +171,24 @@ describe('OwnerService', () => {
     expect(req.request.body).toEqual(null);
   });
 
+  it('should search owners by last name', () => {
+    ownerService.searchOwners('Franklin').subscribe(
+      owners => expect(owners.length).toBe(1)
+    );
+    const req = httpTestingController.expectOne(ownerService.entityUrl + '?lastName=Franklin');
+    expect(req.request.method).toEqual('GET');
+    req.flush([expectedOwners[0]]);
+  });
+
+  it('should search owners with undefined lastName', () => {
+    ownerService.searchOwners(undefined).subscribe(
+      owners => expect(owners).toEqual(expectedOwners)
+    );
+    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    expect(req.request.method).toEqual('GET');
+    req.flush(expectedOwners);
+  });
+
   it('search for delete Owner', () => {
 
     const errorResponse = new HttpErrorResponse({
