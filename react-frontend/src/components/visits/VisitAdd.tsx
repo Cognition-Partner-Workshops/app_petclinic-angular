@@ -21,7 +21,7 @@ export default function VisitAdd() {
       setCurrentPet(pet);
       setCurrentPetType(pet.type);
       if (pet.ownerId) {
-        getOwnerById(pet.ownerId).then(setCurrentOwner);
+        getOwnerById(pet.ownerId).then(setCurrentOwner).catch((err) => setErrorMessage(String(err)));
       }
     }).catch((err) => setErrorMessage(String(err)));
   }, [petId]);

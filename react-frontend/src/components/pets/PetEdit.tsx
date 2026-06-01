@@ -24,7 +24,7 @@ export default function PetEdit() {
         setPet(p);
         setSelectedTypeId(p.type?.id || '');
         if (p.ownerId) {
-          getOwnerById(p.ownerId).then(setCurrentOwner);
+          getOwnerById(p.ownerId).then(setCurrentOwner).catch((err) => setErrorMessage(String(err)));
         }
       }).catch((err) => setErrorMessage(String(err)));
     }

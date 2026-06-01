@@ -66,10 +66,10 @@ export default function OwnerDetail() {
             {owner.pets?.map((pet) => (
               <tr key={pet.id}>
                 <PetListItem pet={pet} onPetDeleted={() => {
-                  setOwner({
-                    ...owner,
-                    pets: owner.pets.filter((p) => p.id !== pet.id),
-                  });
+                  setOwner(prev => prev ? ({
+                    ...prev,
+                    pets: prev.pets.filter((p) => p.id !== pet.id),
+                  }) : prev);
                 }} />
               </tr>
             ))}
