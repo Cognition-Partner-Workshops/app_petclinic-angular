@@ -20,6 +20,7 @@ export default function OwnerEdit() {
       .catch((err) => setErrorMessage(String(err)));
   }, [id]);
 
+  if (errorMessage) return <div className="alert alert-warning">{errorMessage}</div>;
   if (!owner) return <div>Loading...</div>;
 
   const namePattern = /^[a-zA-Z]*$/;

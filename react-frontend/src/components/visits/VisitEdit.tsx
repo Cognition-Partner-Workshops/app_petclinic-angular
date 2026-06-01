@@ -16,6 +16,7 @@ export default function VisitEdit() {
       .catch((err) => setErrorMessage(String(err)));
   }, [id]);
 
+  if (errorMessage) return <div className="alert alert-warning">{errorMessage}</div>;
   if (!visit) return <div>Loading...</div>;
 
   const handleSubmit = (e: FormEvent) => {

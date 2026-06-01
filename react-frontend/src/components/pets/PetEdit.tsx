@@ -30,6 +30,7 @@ export default function PetEdit() {
     }
   }, [id]);
 
+  if (errorMessage) return <div className="alert alert-warning">{errorMessage}</div>;
   if (!pet) return <div>Loading...</div>;
 
   const handleSubmit = (e: FormEvent) => {

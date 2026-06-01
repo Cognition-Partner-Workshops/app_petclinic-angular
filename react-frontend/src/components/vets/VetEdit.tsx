@@ -25,6 +25,7 @@ export default function VetEdit() {
     }
   }, [id]);
 
+  if (errorMessage) return <div className="alert alert-warning">{errorMessage}</div>;
   if (!vet) return <div>Loading...</div>;
 
   const toggleSpec = (specId: number) => {

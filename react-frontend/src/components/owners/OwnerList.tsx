@@ -70,7 +70,7 @@ export default function OwnerList() {
           <div>No owners with LastName starting with &quot;{lastName}&quot;</div>
         )}
 
-        {owners && (
+        {owners && owners.length > 0 && (
           <div className="table-responsive" id="ownersTable">
             <table className="table table-striped">
               <thead>
