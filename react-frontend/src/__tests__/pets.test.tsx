@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { server } from './setup';
-import { pets, owners } from './mocks/data';
+import { pets } from './mocks/data';
 import { PetList } from '../components/PetList';
 import { PetForm } from '../components/PetForm';
 
@@ -165,7 +165,6 @@ describe('PetForm — update', () => {
       }),
     );
 
-    const user = userEvent.setup();
     render(
       <MemoryRouter>
         <PetForm pet={fakePet} />
