@@ -39,7 +39,7 @@ export function PetForm({ pet }: PetFormProps) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    const body = { name, birthDate, type: { id: 1, name: 'cat' } };
+    const body = { name, birthDate, type: pet?.type ?? { id: 1, name: 'cat' } };
 
     try {
       let res: Response;

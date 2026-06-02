@@ -37,7 +37,7 @@ export function VetForm({ vet }: VetFormProps) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    const body = { firstName, lastName, specialties: [] };
+    const body = { firstName, lastName, specialties: vet?.specialties ?? [] };
 
     try {
       let res: Response;

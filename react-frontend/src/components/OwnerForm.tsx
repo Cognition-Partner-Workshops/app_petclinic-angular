@@ -31,12 +31,14 @@ export function OwnerForm({ owner }: OwnerFormProps) {
         body: JSON.stringify(body),
       });
 
-      const errHeader = res.headers.get('errors');
-      if (errHeader) {
-        const parsed = JSON.parse(errHeader) as { errorMessage: string }[];
-        throw new Error(parsed[0].errorMessage);
+      if (!res.ok) {
+        const errHeader = res.headers.get('errors');
+        if (errHeader) {
+          const parsed = JSON.parse(errHeader) as { errorMessage: string }[];
+          throw new Error(parsed[0].errorMessage);
+        }
+        throw new Error(`Error ${res.status}`);
       }
-      if (!res.ok) throw new Error(`Error ${res.status}`);
 
       setSuccess(owner ? 'Owner updated' : 'Owner created');
     } catch (e) {
