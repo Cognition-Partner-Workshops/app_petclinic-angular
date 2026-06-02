@@ -79,7 +79,7 @@ function VisitAdd() {
         <div className="form-actions">
           <button type="button" className="btn"
             onClick={() => navigate(currentOwner ? `/owners/${currentOwner.id}` : '/visits')}>Back</button>
-          <button type="submit" className="btn btn-primary" disabled={!isValid}>Save Visit</button>
+          <button type="submit" className="btn btn-primary" disabled={!isValid || !currentPet || !currentOwner}>Save Visit</button>
         </div>
       </form>
     </div>

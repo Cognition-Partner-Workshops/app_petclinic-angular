@@ -86,7 +86,7 @@ function PetAdd() {
         </div>
         <div className="form-actions">
           <button type="button" className="btn" onClick={() => navigate(`/owners/${id}`)}>Back</button>
-          <button type="submit" className="btn btn-primary" disabled={!isValid}>Save Pet</button>
+          <button type="submit" className="btn btn-primary" disabled={!isValid || !currentOwner}>Save Pet</button>
         </div>
       </form>
     </div>
