@@ -167,7 +167,7 @@ export default function PetAdd() {
               <button
                 className="btn btn-default"
                 type="submit"
-                disabled={!isValid}
+                disabled={!isValid || petTypes.length === 0}
               >
                 Save Pet
               </button>

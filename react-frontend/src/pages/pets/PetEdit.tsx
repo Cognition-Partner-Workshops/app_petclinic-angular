@@ -192,7 +192,7 @@ export default function PetEdit() {
               <button
                 className="btn btn-default"
                 type="submit"
-                disabled={!isValid}
+                disabled={!isValid || petTypes.length === 0}
               >
                 Update Pet
               </button>
