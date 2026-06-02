@@ -46,7 +46,6 @@ function App() {
           <Route path="/pets/:id/visits/add" element={<VisitAdd />} />
 
           <Route path="/visits" element={<VisitList />} />
-          <Route path="/visits/add" element={<VisitAdd />} />
           <Route path="/visits/:id/edit" element={<VisitEdit />} />
 
           <Route path="/vets" element={<VetList />} />

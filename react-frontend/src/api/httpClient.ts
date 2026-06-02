@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { FieldError } from '../types';
 
 const httpClient = axios.create({
-  baseURL: 'http://localhost:9966/petclinic/api/',
+  baseURL: '/petclinic/api/',
 });
 
 export function extractErrorMessage(error: unknown): string {

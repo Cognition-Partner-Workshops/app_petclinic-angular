@@ -48,7 +48,7 @@ function VisitList() {
           ))}
         </tbody>
       </table>
-      <button className="btn" onClick={() => navigate('/visits/add')}>Add Visit</button>
+      <p className="help-text">To add a visit, go to the pet&apos;s owner detail page and click &quot;Add Visit&quot; on the pet.</p>
     </div>
   );
 }
