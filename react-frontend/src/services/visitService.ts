@@ -33,7 +33,7 @@ export async function addVisit(ownerId: number, petId: number, visit: Partial<Vi
 export async function updateVisit(visitId: number, visit: Visit): Promise<Visit> {
   try {
     const response = await api.put<Visit>(`${ENTITY_URL}/${visitId}`, visit);
-    return response.data;
+    return response.status === 204 ? visit : response.data;
   } catch (error) {
     throw parseError(error);
   }

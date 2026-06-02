@@ -33,7 +33,7 @@ export async function addOwner(owner: Partial<Owner>): Promise<Owner> {
 export async function updateOwner(ownerId: number, owner: Owner): Promise<Owner> {
   try {
     const response = await api.put<Owner>(`${ENTITY_URL}/${ownerId}`, owner);
-    return response.data;
+    return response.status === 204 ? owner : response.data;
   } catch (error) {
     throw parseError(error);
   }

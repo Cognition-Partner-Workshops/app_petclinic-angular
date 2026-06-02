@@ -33,7 +33,7 @@ export async function addPet(ownerId: number, pet: Partial<Pet>): Promise<Pet> {
 export async function updatePet(petId: number, pet: Pet): Promise<Pet> {
   try {
     const response = await api.put<Pet>(`${ENTITY_URL}/${petId}`, pet);
-    return response.data;
+    return response.status === 204 ? pet : response.data;
   } catch (error) {
     throw parseError(error);
   }
