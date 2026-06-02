@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { visitService } from '../../api/visitService';
 import { extractErrorMessage } from '../../api/httpClient';
+import type { Pet } from '../../types';
 
 function VisitEdit() {
   const { id } = useParams<{ id: string }>();
@@ -10,12 +11,14 @@ function VisitEdit() {
   const [description, setDescription] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [currentPet, setCurrentPet] = useState<Pet | null>(null);
 
   useEffect(() => {
     if (id) {
       visitService.getVisitById(Number(id)).then((visit) => {
         setDate(visit.date || '');
         setDescription(visit.description || '');
+        setCurrentPet(visit.pet || null);
       }).catch((err) => setErrorMessage(extractErrorMessage(err)));
     }
   }, [id]);
@@ -34,7 +37,7 @@ function VisitEdit() {
     e.preventDefault();
     setTouched({ date: true, description: true });
     if (!isValid || !id) return;
-    visitService.updateVisit(Number(id), { id: Number(id), date, description })
+    visitService.updateVisit(Number(id), { id: Number(id), date, description, pet: currentPet! })
       .then(() => navigate('/visits'))
       .catch((err) => setErrorMessage(extractErrorMessage(err)));
   }
