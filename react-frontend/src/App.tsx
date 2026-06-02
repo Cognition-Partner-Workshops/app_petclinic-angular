@@ -19,7 +19,6 @@ export default function App() {
       <Route path="/owners/:id" element={<OwnerDetail />} />
       <Route path="/owners/:id/edit" element={<OwnerEdit />} />
       <Route path="/owners/:id/pets/add" element={<PetAdd />} />
-      <Route path="/owners/:ownerId/pets/add" element={<PetAdd />} />
       <Route path="/pets" element={<PetList />} />
       <Route path="/pets/add" element={<PetAdd />} />
       <Route path="/pets/:id/edit" element={<PetEdit />} />

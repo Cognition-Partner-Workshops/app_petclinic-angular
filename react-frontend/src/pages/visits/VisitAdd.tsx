@@ -161,7 +161,7 @@ export default function VisitAdd() {
               <button
                 className="btn btn-default"
                 type="submit"
-                disabled={!isValid}
+                disabled={!isValid || !currentPet || !currentOwner}
               >
                 Add Visit
               </button>
