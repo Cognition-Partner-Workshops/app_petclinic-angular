@@ -80,7 +80,7 @@ export default function PetEdit() {
       type: selectedType,
       ownerId,
     })
-      .then(() => navigate(`/owners/${ownerId}`))
+      .then(() => ownerId ? navigate(`/owners/${ownerId}`) : navigate('/owners'))
       .catch((err) => setServerError(extractErrorMessage(err)));
   };
 
@@ -187,7 +187,7 @@ export default function PetEdit() {
               <button
                 className="btn btn-default"
                 type="button"
-                onClick={() => navigate(`/owners/${ownerId}`)}
+                onClick={() => ownerId ? navigate(`/owners/${ownerId}`) : navigate('/owners')}
               >
                 &lt; Back
               </button>
