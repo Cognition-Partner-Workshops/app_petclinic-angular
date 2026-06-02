@@ -50,9 +50,11 @@ export function VisitForm({ visit, ownerId, petId }: VisitFormProps) {
           body: JSON.stringify(body),
         });
       } else {
-        const oId = ownerId ?? 1;
-        const pId = petId ?? 1;
-        res = await fetch(`${API}/owners/${oId}/pets/${pId}/visits`, {
+        if (!ownerId || !petId) {
+          setError('Owner ID and Pet ID are required');
+          return;
+        }
+        res = await fetch(`${API}/owners/${ownerId}/pets/${petId}/visits`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),

@@ -50,8 +50,11 @@ export function PetForm({ pet }: PetFormProps) {
           body: JSON.stringify(body),
         });
       } else {
-        const oId = ownerId ?? '1';
-        res = await fetch(`${API}/owners/${oId}/pets`, {
+        if (!ownerId) {
+          setError('Owner ID is required');
+          return;
+        }
+        res = await fetch(`${API}/owners/${ownerId}/pets`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
