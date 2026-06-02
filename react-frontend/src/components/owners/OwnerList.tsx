@@ -74,7 +74,7 @@ export default function OwnerList() {
         <p>No owners found.</p>
       )}
 
-      {!isLoading && owners.length > 0 && (
+      {!isLoading && !errorMessage && owners.length > 0 && (
         <table>
           <thead>
             <tr>
