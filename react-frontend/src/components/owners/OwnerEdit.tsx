@@ -48,7 +48,7 @@ function OwnerEdit() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setTouched({ firstName: true, lastName: true, address: true, city: true, telephone: true });
-    if (!isValid) return;
+    if (!isValid || !id) return;
     ownerService.updateOwner(Number(id), { id: Number(id), firstName, lastName, address, city, telephone })
       .then(() => navigate(`/owners/${id}`))
       .catch((err) => setErrorMessage(extractErrorMessage(err)));
