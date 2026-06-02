@@ -46,7 +46,7 @@ function OwnerList() {
         </div>
       </form>
 
-      {owners === null && loaded && (
+      {owners === null && loaded && !errorMessage && (
         <div>No owners with LastName starting with &quot;{lastName}&quot;</div>
       )}
 
