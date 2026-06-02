@@ -40,6 +40,8 @@ describe('Pets API', () => {
       } catch (error: unknown) {
         if (isAxiosError(error)) {
           expect(error.response?.status).toBe(404);
+        } else {
+          expect.fail('Expected an AxiosError with response');
         }
       }
     });
@@ -71,6 +73,8 @@ describe('Pets API', () => {
       } catch (error: unknown) {
         if (isAxiosError(error)) {
           expect(error.response?.status).toBe(404);
+        } else {
+          expect.fail('Expected an AxiosError with response');
         }
       }
     });
@@ -86,6 +90,8 @@ describe('Pets API', () => {
       } catch (error: unknown) {
         if (isAxiosError(error)) {
           expect(error.response?.status).toBe(400);
+        } else {
+          expect.fail('Expected an AxiosError with response');
         }
       }
     });
@@ -105,6 +111,8 @@ describe('Pets API', () => {
       } catch (error: unknown) {
         if (isAxiosError(error)) {
           expect(error.response?.status).toBe(404);
+        } else {
+          expect.fail('Expected an AxiosError with response');
         }
       }
     });
@@ -125,6 +133,8 @@ describe('Pets API', () => {
       } catch (error: unknown) {
         if (isAxiosError(error)) {
           expect(error.response?.status).toBe(404);
+        } else {
+          expect.fail('Expected an AxiosError with response');
         }
       }
     });
@@ -144,6 +154,8 @@ describe('Pets API', () => {
       } catch (error: unknown) {
         if (isAxiosError(error)) {
           expect(error.response?.status).toBe(500);
+        } else {
+          expect.fail('Expected an AxiosError with response');
         }
       }
     });
