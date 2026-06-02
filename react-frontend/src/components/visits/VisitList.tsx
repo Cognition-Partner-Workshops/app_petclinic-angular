@@ -61,7 +61,7 @@ export default function VisitList() {
                 <td>{v.description}</td>
                 <td>
                   {v.pet ? (
-                    <Link to={`/owners/${v.pet.owner?.id}`}>{v.pet.name}</Link>
+                    <Link to={v.pet.owner?.id ? `/owners/${v.pet.owner.id}` : `/pets/${v.pet.id}/edit`}>{v.pet.name}</Link>
                   ) : (
                     '—'
                   )}
