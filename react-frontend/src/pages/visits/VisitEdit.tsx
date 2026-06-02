@@ -44,7 +44,7 @@ export default function VisitEdit() {
           getOwnerById(pet.ownerId)
             .then((owner) => setCurrentOwner(owner))
             .catch((err) => setServerError(extractErrorMessage(err)));
-        });
+        }).catch((err) => setServerError(extractErrorMessage(err)));
       }
     }).catch((err) => setServerError(extractErrorMessage(err)));
   }, [id]);

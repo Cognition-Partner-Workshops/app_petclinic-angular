@@ -52,7 +52,7 @@ export default function PetEdit() {
       getOwnerById(pet.ownerId)
         .then((o) => setOwnerName(`${o.firstName} ${o.lastName}`))
         .catch((err) => setServerError(extractErrorMessage(err)));
-    });
+    }).catch((err) => setServerError(extractErrorMessage(err)));
   }, [id]);
 
   const errors = validatePet(form);

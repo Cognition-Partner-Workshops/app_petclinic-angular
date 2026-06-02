@@ -58,7 +58,7 @@ export default function OwnerEdit() {
         city: owner.city || '',
         telephone: owner.telephone || '',
       });
-    });
+    }).catch((err) => setServerError(extractErrorMessage(err)));
   }, [id]);
 
   const errors = validate(form);
