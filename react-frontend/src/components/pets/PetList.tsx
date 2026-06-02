@@ -34,7 +34,7 @@ export default function PetList() {
           <button onClick={() => setError(null)}>Dismiss</button>
         </div>
       )}
-      {!isLoading && pets.length === 0 && <p>No pets found</p>}
+      {!isLoading && !error && pets.length === 0 && <p>No pets found</p>}
       <table>
         <thead>
           <tr>

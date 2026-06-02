@@ -50,7 +50,7 @@ export default function OwnerEdit() {
     if (!ownerId) return;
 
     setIsSubmitting(true);
-    updateOwner(Number(ownerId), { id: Number(ownerId), firstName, lastName, address, city, telephone, pets: [] })
+    updateOwner(Number(ownerId), { id: Number(ownerId), firstName, lastName, address, city, telephone })
       .then(() => {
         navigate(`/owners/${ownerId}`);
       })

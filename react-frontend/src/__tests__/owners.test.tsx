@@ -141,6 +141,20 @@ describe('Owner Detail', () => {
 
 describe('Owner Add', () => {
   it('creates a new owner with valid form data', async () => {
+    server.use(
+      http.get('http://localhost:9966/petclinic/api/owners/3', () => {
+        return HttpResponse.json({
+          id: 3,
+          firstName: 'John',
+          lastName: 'Doe',
+          address: '123 Main St.',
+          city: 'Springfield',
+          telephone: '5551234567',
+          pets: [],
+        });
+      })
+    );
+
     const user = userEvent.setup();
     renderWithRouter(
       <Routes>

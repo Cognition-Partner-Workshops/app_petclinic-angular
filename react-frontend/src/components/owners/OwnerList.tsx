@@ -60,7 +60,7 @@ export default function OwnerList() {
         <button onClick={handleSearch}>Search</button>
       </div>
       <Link to="/owners/new">Add Owner</Link>
-      {!isLoading && owners.length === 0 && <p>No owners found</p>}
+      {!isLoading && !error && owners.length === 0 && <p>No owners found</p>}
       <table>
         <thead>
           <tr>

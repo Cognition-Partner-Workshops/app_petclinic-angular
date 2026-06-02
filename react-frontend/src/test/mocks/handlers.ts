@@ -87,7 +87,6 @@ export const handlers = [
   http.post(`${BASE_URL}/owners`, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     const newOwner = { id: 3, ...body, pets: [] };
-    mockOwners.push(newOwner);
     return HttpResponse.json(newOwner, { status: 201 });
   }),
 

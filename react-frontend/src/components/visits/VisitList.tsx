@@ -33,7 +33,7 @@ export default function VisitList() {
           <button onClick={() => setError(null)}>Dismiss</button>
         </div>
       )}
-      {!isLoading && visits.length === 0 && <p>No visits found</p>}
+      {!isLoading && !error && visits.length === 0 && <p>No visits found</p>}
       <table>
         <thead>
           <tr>
