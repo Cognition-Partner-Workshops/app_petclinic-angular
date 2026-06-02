@@ -31,9 +31,11 @@ export default function VisitEdit() {
               setCurrentPet(pet);
               setCurrentPetType(pet.type);
               if (pet.ownerId) {
-                getOwnerById(pet.ownerId).then((owner) => setCurrentOwner(owner));
+                getOwnerById(pet.ownerId)
+                  .then((owner) => setCurrentOwner(owner))
+                  .catch((err: string) => setErrorMessage(err));
               }
-            });
+            }).catch((err: string) => setErrorMessage(err));
           }
         })
         .catch((err: string) => setErrorMessage(err));
@@ -77,7 +79,7 @@ export default function VisitEdit() {
       date: validateField('date', form.date),
       description: validateField('description', form.description),
     });
-    if (!isFormValid() || !visitId) return;
+    if (!isFormValid() || !visitId || !currentPet.id || !currentOwner.id) return;
 
     updateVisit(Number(visitId), {
       id: Number(visitId),
