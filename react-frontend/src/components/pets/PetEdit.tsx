@@ -45,7 +45,7 @@ function PetEdit() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setTouched({ name: true, birthDate: true, type: true });
-    if (!isValid || !id) return;
+    if (!isValid || !id || petTypes.length === 0) return;
     const selectedType = petTypes.find((t) => t.id === typeId);
     petService.updatePet(Number(id), {
       id: Number(id),

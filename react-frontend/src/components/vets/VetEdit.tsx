@@ -50,7 +50,7 @@ function VetEdit() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setTouched({ firstName: true, lastName: true });
-    if (!isValid || !id) return;
+    if (!isValid || !id || (selectedSpecialtyIds.length > 0 && specList.length === 0)) return;
     const specialties = specList.filter((s) => selectedSpecialtyIds.includes(s.id));
     vetService.updateVet(Number(id), { id: Number(id), firstName, lastName, specialties })
       .then(() => navigate('/vets'))
