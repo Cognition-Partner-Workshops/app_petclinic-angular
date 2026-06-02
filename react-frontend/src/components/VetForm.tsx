@@ -64,6 +64,7 @@ export function VetForm({ vet }: VetFormProps) {
   const handleDelete = async () => {
     if (!vet) return;
     setError(null);
+    setSuccess(null);
     try {
       const res = await fetch(`${API}/vets/${vet.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`Error ${res.status}`);

@@ -67,6 +67,7 @@ export function PetForm({ pet }: PetFormProps) {
   const handleDelete = async () => {
     if (!pet) return;
     setError(null);
+    setSuccess(null);
     try {
       const res = await fetch(`${API}/pets/${pet.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`Error ${res.status}`);

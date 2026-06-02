@@ -47,6 +47,7 @@ export function OwnerForm({ owner }: OwnerFormProps) {
   const handleDelete = async () => {
     if (!owner) return;
     setError(null);
+    setSuccess(null);
     try {
       const res = await fetch(`${API}/owners/${owner.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`Error ${res.status}`);

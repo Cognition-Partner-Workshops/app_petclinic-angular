@@ -68,6 +68,7 @@ export function VisitForm({ visit, ownerId, petId }: VisitFormProps) {
   const handleDelete = async () => {
     if (!visit) return;
     setError(null);
+    setSuccess(null);
     try {
       const res = await fetch(`${API}/visits/${visit.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`Error ${res.status}`);
