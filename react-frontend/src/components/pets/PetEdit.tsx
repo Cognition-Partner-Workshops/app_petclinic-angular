@@ -76,6 +76,7 @@ export default function PetEdit() {
 
   const handleDelete = () => {
     if (!petId) return;
+    setApiError(null);
     deletePet(Number(petId))
       .then(() => {
         navigate(`/owners/${ownerId}`);

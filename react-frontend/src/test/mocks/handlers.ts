@@ -151,4 +151,16 @@ export const handlers = [
   http.delete(`${BASE_URL}/visits/:visitId`, () => {
     return new HttpResponse(null, { status: 204 });
   }),
+
+  // Pet Types
+  http.get(`${BASE_URL}/pettypes`, () => {
+    return HttpResponse.json([
+      { id: 1, name: 'cat' },
+      { id: 2, name: 'dog' },
+      { id: 3, name: 'lizard' },
+      { id: 4, name: 'snake' },
+      { id: 5, name: 'bird' },
+      { id: 6, name: 'hamster' },
+    ]);
+  }),
 ];
