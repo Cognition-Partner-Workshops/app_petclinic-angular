@@ -34,8 +34,10 @@ export function OwnerForm({ owner }: OwnerFormProps) {
       if (!res.ok) {
         const errHeader = res.headers.get('errors');
         if (errHeader) {
-          const parsed = JSON.parse(errHeader) as { errorMessage: string }[];
-          throw new Error(parsed[0].errorMessage);
+          const parsed = JSON.parse(errHeader);
+          if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].errorMessage) {
+            throw new Error(parsed[0].errorMessage);
+          }
         }
         throw new Error(`Error ${res.status}`);
       }
