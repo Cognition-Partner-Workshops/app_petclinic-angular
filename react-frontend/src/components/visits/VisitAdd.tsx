@@ -21,7 +21,7 @@ function VisitAdd() {
       petService.getPetById(Number(id)).then((pet) => {
         setCurrentPet(pet);
         if (pet.ownerId) {
-          ownerService.getOwnerById(pet.ownerId).then(setCurrentOwner);
+          ownerService.getOwnerById(pet.ownerId).then(setCurrentOwner).catch((err) => setErrorMessage(extractErrorMessage(err)));
         }
       }).catch((err) => setErrorMessage(extractErrorMessage(err)));
     }

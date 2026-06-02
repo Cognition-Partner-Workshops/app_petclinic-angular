@@ -25,7 +25,7 @@ function PetEdit() {
         setBirthDate(pet.birthDate || '');
         setTypeId(pet.type?.id || '');
         if (pet.ownerId) {
-          ownerService.getOwnerById(pet.ownerId).then(setCurrentOwner);
+          ownerService.getOwnerById(pet.ownerId).then(setCurrentOwner).catch((err) => setErrorMessage(extractErrorMessage(err)));
         }
       }).catch((err) => setErrorMessage(extractErrorMessage(err)));
     }

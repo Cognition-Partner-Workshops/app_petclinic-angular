@@ -23,7 +23,7 @@ function OwnerList() {
     } else {
       ownerService.searchOwners(lastName)
         .then(setOwners)
-        .catch(() => setOwners(null));
+        .catch((err) => { setErrorMessage(extractErrorMessage(err)); setOwners(null); });
     }
   }
 
