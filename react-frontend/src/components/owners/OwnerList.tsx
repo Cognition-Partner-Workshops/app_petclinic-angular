@@ -18,6 +18,7 @@ function OwnerList() {
   }, []);
 
   function searchByLastName() {
+    setErrorMessage('');
     if (!lastName) {
       ownerService.getOwners().then(setOwners).catch((err) => setErrorMessage(extractErrorMessage(err)));
     } else {
@@ -46,7 +47,7 @@ function OwnerList() {
         </div>
       </form>
 
-      {owners === null && loaded && !errorMessage && (
+      {owners !== null && owners.length === 0 && loaded && !errorMessage && (
         <div>No owners with LastName starting with &quot;{lastName}&quot;</div>
       )}
 
