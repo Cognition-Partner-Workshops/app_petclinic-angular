@@ -45,9 +45,10 @@ export default function OwnerList() {
           }}
         >
           <div className="form-group">
-            <label className="col-sm-2 control-label">Last name</label>
+            <label htmlFor="lastNameSearch" className="col-sm-2 control-label">Last name</label>
             <div className="col-sm-10">
               <input
+                id="lastNameSearch"
                 className="form-control"
                 maxLength={80}
                 value={lastName}
@@ -58,7 +59,7 @@ export default function OwnerList() {
           <div className="form-group">
             <div className="col-sm-offset-2 col-sm-10">
               <button type="submit" className="btn btn-default">
-                Find Owner
+                Search
               </button>
             </div>
           </div>
@@ -85,7 +86,8 @@ export default function OwnerList() {
                   <tr key={owner.id}>
                     <td>
                       <Link to={`/owners/${owner.id}`}>
-                        {owner.firstName} {owner.lastName}
+                        <span>{owner.firstName}</span>{' '}
+                        <span>{owner.lastName}</span>
                       </Link>
                     </td>
                     <td>{owner.address}</td>

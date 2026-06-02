@@ -22,7 +22,8 @@ function validatePet(values: { name: string; birthDate: string; typeId: string }
 }
 
 export default function PetAdd() {
-  const { id } = useParams<{ id: string }>();
+  const { id, ownerId: ownerIdParam } = useParams<{ id?: string; ownerId?: string }>();
+  const resolvedId = ownerIdParam || id;
   const navigate = useNavigate();
   const [ownerName, setOwnerName] = useState('');
   const [ownerId, setOwnerId] = useState<number>(0);
@@ -32,8 +33,8 @@ export default function PetAdd() {
   const [serverError, setServerError] = useState('');
 
   useEffect(() => {
-    if (!id) return;
-    const numId = Number(id);
+    if (!resolvedId) return;
+    const numId = Number(resolvedId);
     setOwnerId(numId);
     getOwnerById(numId)
       .then((o) => setOwnerName(`${o.firstName} ${o.lastName}`))
@@ -41,7 +42,7 @@ export default function PetAdd() {
     getPetTypes()
       .then((types) => setPetTypes(types))
       .catch((err) => setServerError(extractErrorMessage(err)));
-  }, [id]);
+  }, [resolvedId]);
 
   const errors = validatePet(form);
   const isValid = Object.keys(errors).length === 0;
@@ -82,9 +83,10 @@ export default function PetAdd() {
               touched.name ? (errors.name ? 'has-error' : 'has-success') : ''
             }`}
           >
-            <label className="col-sm-2 control-label">Name</label>
+            <label htmlFor="pet-name" className="col-sm-2 control-label">Name</label>
             <div className="col-sm-10">
               <input
+                id="pet-name"
                 type="text"
                 className="form-control"
                 value={form.name}
@@ -107,9 +109,10 @@ export default function PetAdd() {
                 : ''
             }`}
           >
-            <label className="col-sm-2 control-label">Birth Date</label>
+            <label htmlFor="pet-birthDate" className="col-sm-2 control-label">Birth Date</label>
             <div className="col-sm-10">
               <input
+                id="pet-birthDate"
                 type="date"
                 className="form-control"
                 value={form.birthDate}

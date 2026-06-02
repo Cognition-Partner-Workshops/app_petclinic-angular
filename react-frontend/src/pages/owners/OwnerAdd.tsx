@@ -79,7 +79,7 @@ export default function OwnerAdd() {
                     : ''
                 }`}
               >
-                <label className="col-sm-2 control-label">
+                <label htmlFor={`owner-${field}`} className="col-sm-2 control-label">
                   {field === 'firstName'
                     ? 'First Name'
                     : field === 'lastName'
@@ -90,6 +90,7 @@ export default function OwnerAdd() {
                 </label>
                 <div className="col-sm-10">
                   <input
+                    id={`owner-${field}`}
                     type="text"
                     className="form-control"
                     value={form[field]}

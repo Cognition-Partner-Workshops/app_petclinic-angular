@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 
-const BASE_URL = 'http://localhost:9966/petclinic/api';
+const BASE_URL = '/petclinic/api';
 
 // --- Seed data ---
 

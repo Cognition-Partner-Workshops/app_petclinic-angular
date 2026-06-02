@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { Owner } from '../../types';
-import { getOwnerById } from '../../api/ownerApi';
+import { getOwnerById, deleteOwner } from '../../api/ownerApi';
 import { deleteVisit } from '../../api/visitApi';
 import { deletePet } from '../../api/petApi';
 import { extractErrorMessage } from '../../api/errorUtils';
@@ -63,7 +63,8 @@ export default function OwnerDetail() {
                   <th>Name</th>
                   <td>
                     <b>
-                      {owner.firstName} {owner.lastName}
+                      <span>{owner.firstName}</span>{' '}
+                      <span>{owner.lastName}</span>
                     </b>
                   </td>
                 </tr>
@@ -97,6 +98,16 @@ export default function OwnerDetail() {
             >
               Add New Pet
             </button>
+            <button
+              className="btn btn-default"
+              onClick={() => {
+                deleteOwner(owner.id)
+                  .then(() => navigate('/owners'))
+                  .catch((err) => setErrorMessage(extractErrorMessage(err)));
+              }}
+            >
+              Delete
+            </button>
 
             <br />
             <br />
@@ -126,7 +137,7 @@ export default function OwnerDetail() {
                         className="btn btn-default"
                         onClick={() => handleDeletePet(pet.id)}
                       >
-                        Delete Pet
+                        Remove Pet
                       </button>
                       <button
                         className="btn btn-default"
@@ -164,7 +175,7 @@ export default function OwnerDetail() {
                                       handleDeleteVisit(visit.id, pet.id)
                                     }
                                   >
-                                    Delete Visit
+                                    Remove Visit
                                   </button>
                                 </td>
                               </tr>

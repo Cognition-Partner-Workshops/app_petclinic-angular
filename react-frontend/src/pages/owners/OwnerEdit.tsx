@@ -95,7 +95,7 @@ export default function OwnerEdit() {
                     : ''
                 }`}
               >
-                <label className="col-sm-2 control-label">
+                <label htmlFor={`edit-${field}`} className="col-sm-2 control-label">
                   {field === 'firstName'
                     ? 'First Name'
                     : field === 'lastName'
@@ -106,6 +106,7 @@ export default function OwnerEdit() {
                 </label>
                 <div className="col-sm-10">
                   <input
+                    id={`edit-${field}`}
                     type="text"
                     className="form-control"
                     value={form[field]}

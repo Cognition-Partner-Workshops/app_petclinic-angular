@@ -19,7 +19,12 @@ function validateVisit(values: { date: string; description: string }): FormError
 }
 
 export default function VisitAdd() {
-  const { id } = useParams<{ id: string }>();
+  const { id, ownerId: ownerIdParam, petId: petIdParam } = useParams<{
+    id?: string;
+    ownerId?: string;
+    petId?: string;
+  }>();
+  const resolvedPetId = petIdParam || id;
   const navigate = useNavigate();
   const [currentPet, setCurrentPet] = useState<Pet | null>(null);
   const [currentOwner, setCurrentOwner] = useState<Owner | null>(null);
@@ -29,15 +34,16 @@ export default function VisitAdd() {
   const [serverError, setServerError] = useState('');
 
   useEffect(() => {
-    if (!id) return;
-    getPetById(Number(id)).then((pet) => {
+    if (!resolvedPetId) return;
+    getPetById(Number(resolvedPetId)).then((pet) => {
       setCurrentPet(pet);
       setCurrentPetType(pet.type);
-      getOwnerById(pet.ownerId)
+      const oId = ownerIdParam ? Number(ownerIdParam) : pet.ownerId;
+      getOwnerById(oId)
         .then((owner) => setCurrentOwner(owner))
         .catch((err) => setServerError(extractErrorMessage(err)));
     }).catch((err) => setServerError(extractErrorMessage(err)));
-  }, [id]);
+  }, [resolvedPetId, ownerIdParam]);
 
   const errors = validateVisit(form);
   const isValid = Object.keys(errors).length === 0;
@@ -95,9 +101,10 @@ export default function VisitAdd() {
               touched.date ? (errors.date ? 'has-error' : 'has-success') : ''
             }`}
           >
-            <label className="col-sm-2 control-label">Date</label>
+            <label htmlFor="visit-date" className="col-sm-2 control-label">Date</label>
             <div className="col-sm-10">
               <input
+                id="visit-date"
                 type="date"
                 className="form-control"
                 value={form.date}
@@ -119,9 +126,10 @@ export default function VisitAdd() {
                 : ''
             }`}
           >
-            <label className="col-sm-2 control-label">Description</label>
+            <label htmlFor="visit-description" className="col-sm-2 control-label">Description</label>
             <div className="col-sm-10">
               <input
+                id="visit-description"
                 type="text"
                 className="form-control"
                 maxLength={255}

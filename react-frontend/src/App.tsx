@@ -19,10 +19,12 @@ export default function App() {
       <Route path="/owners/:id" element={<OwnerDetail />} />
       <Route path="/owners/:id/edit" element={<OwnerEdit />} />
       <Route path="/owners/:id/pets/add" element={<PetAdd />} />
+      <Route path="/owners/:ownerId/pets/add" element={<PetAdd />} />
       <Route path="/pets" element={<PetList />} />
       <Route path="/pets/add" element={<PetAdd />} />
       <Route path="/pets/:id/edit" element={<PetEdit />} />
       <Route path="/pets/:id/visits/add" element={<VisitAdd />} />
+      <Route path="/owners/:ownerId/pets/:petId/visits/add" element={<VisitAdd />} />
       <Route path="/visits" element={<VisitList />} />
       <Route path="/visits/add" element={<VisitAdd />} />
       <Route path="/visits/:id/edit" element={<VisitEdit />} />
