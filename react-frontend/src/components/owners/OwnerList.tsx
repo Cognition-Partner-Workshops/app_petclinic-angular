@@ -62,7 +62,7 @@ export default function OwnerList() {
         </div>
       </form>
 
-      {owners === null && (
+      {isDataReceived && owners === null && (
         <div>No owners with LastName starting with &quot;{lastName}&quot;</div>
       )}
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import type { PetType } from '../../types';
-import { getOwnerById } from '../../services/ownerService';
+import type { Owner, PetType } from '../../types';
+import { getOwnerById, getOwners } from '../../services/ownerService';
 import { addPet } from '../../services/petService';
 import { getPetTypes } from '../../services/petTypeService';
 
@@ -9,12 +9,15 @@ interface FormErrors {
   name?: string;
   birthDate?: string;
   type?: string;
+  owner?: string;
 }
 
 export default function PetAdd() {
-  const { id: ownerId } = useParams<{ id: string }>();
+  const { id: ownerIdParam } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [ownerName, setOwnerName] = useState('');
+  const [selectedOwnerId, setSelectedOwnerId] = useState(ownerIdParam ?? '');
+  const [allOwners, setAllOwners] = useState<Owner[]>([]);
   const [petTypes, setPetTypes] = useState<PetType[]>([]);
   const [form, setForm] = useState({ name: '', birthDate: '', typeId: '' });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -26,12 +29,17 @@ export default function PetAdd() {
       .then((types) => setPetTypes(types))
       .catch((err: string) => setErrorMessage(err));
 
-    if (ownerId) {
-      getOwnerById(Number(ownerId))
+    if (ownerIdParam) {
+      setSelectedOwnerId(ownerIdParam);
+      getOwnerById(Number(ownerIdParam))
         .then((owner) => setOwnerName(`${owner.firstName} ${owner.lastName}`))
         .catch((err: string) => setErrorMessage(err));
+    } else {
+      getOwners()
+        .then((owners) => setAllOwners(owners))
+        .catch((err: string) => setErrorMessage(err));
     }
-  }, [ownerId]);
+  }, [ownerIdParam]);
 
   function validateField(field: string, value: string): string | undefined {
     switch (field) {
@@ -46,13 +54,22 @@ export default function PetAdd() {
       case 'type':
         if (!value) return 'Pet type is required';
         return undefined;
+      case 'owner':
+        if (!value) return 'Owner is required';
+        return undefined;
       default:
         return undefined;
     }
   }
 
   function handleChange(field: string, value: string) {
-    setForm((prev) => ({ ...prev, [field === 'type' ? 'typeId' : field]: value }));
+    if (field === 'type') {
+      setForm((prev) => ({ ...prev, typeId: value }));
+    } else if (field === 'owner') {
+      setSelectedOwnerId(value);
+    } else {
+      setForm((prev) => ({ ...prev, [field]: value }));
+    }
     if (touched[field]) {
       setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }));
     }
@@ -60,35 +77,48 @@ export default function PetAdd() {
 
   function handleBlur(field: string) {
     setTouched((prev) => ({ ...prev, [field]: true }));
-    const value = field === 'type' ? form.typeId : form[field as keyof typeof form];
+    let value: string;
+    if (field === 'type') value = form.typeId;
+    else if (field === 'owner') value = selectedOwnerId;
+    else value = form[field as keyof typeof form];
     setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }));
   }
 
   function isFormValid(): boolean {
-    return !validateField('name', form.name)
+    const baseValid = !validateField('name', form.name)
       && !validateField('birthDate', form.birthDate)
       && !validateField('type', form.typeId);
+    if (!ownerIdParam) {
+      return baseValid && !validateField('owner', selectedOwnerId);
+    }
+    return baseValid;
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setTouched({ name: true, birthDate: true, type: true });
-    setErrors({
+    const newTouched: Record<string, boolean> = { name: true, birthDate: true, type: true };
+    const newErrors: FormErrors = {
       name: validateField('name', form.name),
       birthDate: validateField('birthDate', form.birthDate),
       type: validateField('type', form.typeId),
-    });
+    };
+    if (!ownerIdParam) {
+      newTouched.owner = true;
+      newErrors.owner = validateField('owner', selectedOwnerId);
+    }
+    setTouched(newTouched);
+    setErrors(newErrors);
     if (!isFormValid()) return;
 
     const selectedType = petTypes.find((t) => t.id === Number(form.typeId));
-    if (!selectedType || !ownerId) return;
+    if (!selectedType || !selectedOwnerId) return;
 
-    addPet(Number(ownerId), {
+    addPet(Number(selectedOwnerId), {
       name: form.name,
       birthDate: form.birthDate,
       type: selectedType,
     })
-      .then(() => navigate(`/owners/${ownerId}`))
+      .then(() => navigate(`/owners/${selectedOwnerId}`))
       .catch((err: string) => setErrorMessage(err));
   }
 
@@ -99,12 +129,36 @@ export default function PetAdd() {
       {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
 
       <form className="form-horizontal" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="col-sm-2 control-label">Owner</label>
-          <div className="col-sm-10">
-            <input className="form-control" type="text" value={ownerName} readOnly />
+        {ownerIdParam ? (
+          <div className="form-group">
+            <label className="col-sm-2 control-label">Owner</label>
+            <div className="col-sm-10">
+              <input className="form-control" type="text" value={ownerName} readOnly />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className={`form-group has-feedback ${touched.owner ? (errors.owner ? 'has-error' : 'has-success') : ''}`}>
+            <label htmlFor="owner" className="col-sm-2 control-label">Owner</label>
+            <div className="col-sm-10">
+              <select
+                id="owner"
+                className="form-control"
+                value={selectedOwnerId}
+                onChange={(e) => handleChange('owner', e.target.value)}
+                onBlur={() => handleBlur('owner')}
+                required
+              >
+                <option value="">-- Select Owner --</option>
+                {allOwners.map((owner) => (
+                  <option key={owner.id} value={owner.id}>
+                    {owner.firstName} {owner.lastName}
+                  </option>
+                ))}
+              </select>
+              {touched.owner && errors.owner && <span className="help-block">{errors.owner}</span>}
+            </div>
+          </div>
+        )}
 
         <div className={`form-group has-feedback ${touched.name ? (errors.name ? 'has-error' : 'has-success') : ''}`}>
           <label htmlFor="name" className="col-sm-2 control-label">Name</label>
@@ -163,7 +217,7 @@ export default function PetAdd() {
 
         <div className="form-group">
           <div className="col-sm-offset-2 col-sm-10">
-            <button className="btn btn-default" type="button" onClick={() => navigate(`/owners/${ownerId}`)}>
+            <button className="btn btn-default" type="button" onClick={() => navigate(ownerIdParam ? `/owners/${ownerIdParam}` : '/pets')}>
               &lt; Back
             </button>
             <button className="btn btn-default" type="submit" disabled={!isFormValid()}>

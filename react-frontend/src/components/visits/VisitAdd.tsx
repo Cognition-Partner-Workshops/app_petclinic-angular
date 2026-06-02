@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { Pet, Owner, PetType, Visit } from '../../types';
-import { getPetById } from '../../services/petService';
+import { getPetById, getPets } from '../../services/petService';
 import { getOwnerById } from '../../services/ownerService';
 import { addVisit, deleteVisit } from '../../services/visitService';
 
 interface FormErrors {
   date?: string;
   description?: string;
+  pet?: string;
 }
 
 export default function VisitAdd() {
-  const { id: petId } = useParams<{ id: string }>();
+  const { id: petIdParam } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [currentPet, setCurrentPet] = useState<Pet>({} as Pet);
   const [currentOwner, setCurrentOwner] = useState<Owner>({} as Owner);
   const [currentPetType, setCurrentPetType] = useState<PetType>({} as PetType);
+  const [allPets, setAllPets] = useState<Pet[]>([]);
+  const [selectedPetId, setSelectedPetId] = useState(petIdParam ?? '');
   const [form, setForm] = useState({ date: '', description: '' });
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -23,19 +26,43 @@ export default function VisitAdd() {
   const [visits, setVisits] = useState<Visit[]>([]);
 
   useEffect(() => {
-    if (petId) {
-      getPetById(Number(petId))
-        .then((pet) => {
-          setCurrentPet(pet);
-          setCurrentPetType(pet.type);
-          setVisits(pet.visits || []);
-          if (pet.ownerId) {
-            getOwnerById(pet.ownerId).then((owner) => setCurrentOwner(owner));
-          }
-        })
+    if (petIdParam) {
+      setSelectedPetId(petIdParam);
+      loadPetData(Number(petIdParam));
+    } else {
+      getPets()
+        .then((pets) => setAllPets(pets))
         .catch((err: string) => setErrorMessage(err));
     }
-  }, [petId]);
+  }, [petIdParam]);
+
+  function loadPetData(petId: number) {
+    getPetById(petId)
+      .then((pet) => {
+        setCurrentPet(pet);
+        setCurrentPetType(pet.type);
+        setVisits(pet.visits || []);
+        if (pet.ownerId) {
+          getOwnerById(pet.ownerId).then((owner) => setCurrentOwner(owner));
+        }
+      })
+      .catch((err: string) => setErrorMessage(err));
+  }
+
+  function handlePetSelect(petId: string) {
+    setSelectedPetId(petId);
+    if (petId) {
+      loadPetData(Number(petId));
+    } else {
+      setCurrentPet({} as Pet);
+      setCurrentOwner({} as Owner);
+      setCurrentPetType({} as PetType);
+      setVisits([]);
+    }
+    if (touched.pet) {
+      setErrors((prev) => ({ ...prev, pet: validateField('pet', petId) }));
+    }
+  }
 
   function validateField(field: string, value: string): string | undefined {
     switch (field) {
@@ -45,6 +72,9 @@ export default function VisitAdd() {
       case 'description':
         if (!value) return 'Description is required';
         if (value.length > 255) return 'Description may be at most 255 characters long';
+        return undefined;
+      case 'pet':
+        if (!value) return 'Pet is required';
         return undefined;
       default:
         return undefined;
@@ -60,20 +90,34 @@ export default function VisitAdd() {
 
   function handleBlur(field: string) {
     setTouched((prev) => ({ ...prev, [field]: true }));
-    setErrors((prev) => ({ ...prev, [field]: validateField(field, form[field as keyof typeof form]) }));
+    if (field === 'pet') {
+      setErrors((prev) => ({ ...prev, pet: validateField('pet', selectedPetId) }));
+    } else {
+      setErrors((prev) => ({ ...prev, [field]: validateField(field, form[field as keyof typeof form]) }));
+    }
   }
 
   function isFormValid(): boolean {
-    return !validateField('date', form.date) && !validateField('description', form.description);
+    const baseValid = !validateField('date', form.date) && !validateField('description', form.description);
+    if (!petIdParam) {
+      return baseValid && !validateField('pet', selectedPetId);
+    }
+    return baseValid;
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setTouched({ date: true, description: true });
-    setErrors({
+    const newTouched: Record<string, boolean> = { date: true, description: true };
+    const newErrors: FormErrors = {
       date: validateField('date', form.date),
       description: validateField('description', form.description),
-    });
+    };
+    if (!petIdParam) {
+      newTouched.pet = true;
+      newErrors.pet = validateField('pet', selectedPetId);
+    }
+    setTouched(newTouched);
+    setErrors(newErrors);
     if (!isFormValid() || !currentPet.id || !currentOwner.id) return;
 
     addVisit(currentOwner.id, currentPet.id, {
@@ -98,25 +142,53 @@ export default function VisitAdd() {
 
       {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
 
-      <b>Pet</b>
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Birth Date</th>
-            <th>Type</th>
-            <th>Owner</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{currentPet.name}</td>
-            <td>{currentPet.birthDate}</td>
-            <td>{currentPetType.name}</td>
-            <td>{currentOwner.firstName} {currentOwner.lastName}</td>
-          </tr>
-        </tbody>
-      </table>
+      {!petIdParam && (
+        <div className={`form-group has-feedback ${touched.pet ? (errors.pet ? 'has-error' : 'has-success') : ''}`}>
+          <label htmlFor="pet-select" className="col-sm-2 control-label">Pet</label>
+          <div className="col-sm-10">
+            <select
+              id="pet-select"
+              className="form-control"
+              value={selectedPetId}
+              onChange={(e) => handlePetSelect(e.target.value)}
+              onBlur={() => handleBlur('pet')}
+              required
+            >
+              <option value="">-- Select Pet --</option>
+              {allPets.map((pet) => (
+                <option key={pet.id} value={pet.id}>
+                  {pet.name} {pet.owner ? `(${pet.owner.firstName} ${pet.owner.lastName})` : ''}
+                </option>
+              ))}
+            </select>
+            {touched.pet && errors.pet && <span className="help-block">{errors.pet}</span>}
+          </div>
+        </div>
+      )}
+
+      {(petIdParam || selectedPetId) && currentPet.name && (
+        <>
+          <b>Pet</b>
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Birth Date</th>
+                <th>Type</th>
+                <th>Owner</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{currentPet.name}</td>
+                <td>{currentPet.birthDate}</td>
+                <td>{currentPetType.name}</td>
+                <td>{currentOwner.firstName} {currentOwner.lastName}</td>
+              </tr>
+            </tbody>
+          </table>
+        </>
+      )}
 
       <form className="form-horizontal" onSubmit={handleSubmit}>
         <div className={`form-group has-feedback ${touched.date ? (errors.date ? 'has-error' : 'has-success') : ''}`}>
@@ -155,7 +227,13 @@ export default function VisitAdd() {
 
         <div className="form-group">
           <div className="col-sm-offset-2 col-sm-10">
-            <button className="btn btn-default" type="button" onClick={() => navigate(`/owners/${currentOwner.id}`)}>
+            <button className="btn btn-default" type="button" onClick={() => {
+              if (currentOwner.id) {
+                navigate(`/owners/${currentOwner.id}`);
+              } else {
+                navigate('/visits');
+              }
+            }}>
               Back
             </button>
             <button className="btn btn-default" type="submit" disabled={!isFormValid()}>
@@ -165,35 +243,37 @@ export default function VisitAdd() {
         </div>
       </form>
 
-      <br />
-      <b>Previous Visits</b>
-      <br />
       {visits.length > 0 && (
-        <table className="table table-condensed">
-          <thead>
-            <tr>
-              <th>Visit Date</th>
-              <th>Description</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visits.map((visit) => (
-              <tr key={visit.id}>
-                <td>{visit.date}</td>
-                <td>{visit.description}</td>
-                <td>
-                  <button className="btn btn-default btn-sm" onClick={() => navigate(`/visits/${visit.id}/edit`)}>
-                    Edit Visit
-                  </button>
-                  <button className="btn btn-default btn-sm" onClick={() => handleDeleteVisit(visit.id)}>
-                    Delete Visit
-                  </button>
-                </td>
+        <>
+          <br />
+          <b>Previous Visits</b>
+          <br />
+          <table className="table table-condensed">
+            <thead>
+              <tr>
+                <th>Visit Date</th>
+                <th>Description</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {visits.map((visit) => (
+                <tr key={visit.id}>
+                  <td>{visit.date}</td>
+                  <td>{visit.description}</td>
+                  <td>
+                    <button className="btn btn-default btn-sm" onClick={() => navigate(`/visits/${visit.id}/edit`)}>
+                      Edit Visit
+                    </button>
+                    <button className="btn btn-default btn-sm" onClick={() => handleDeleteVisit(visit.id)}>
+                      Delete Visit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
       )}
     </div>
   );
