@@ -43,6 +43,7 @@ export async function updateOwner(ownerId: number, owner: Owner): Promise<Owner>
   if (!response.ok) {
     throw new Error(`Server returned code ${response.status} with body "${await response.text()}"`);
   }
+  if (response.status === 204) return owner;
   return response.json();
 }
 

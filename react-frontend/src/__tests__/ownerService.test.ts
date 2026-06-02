@@ -111,6 +111,25 @@ describe('Owner CRUD', () => {
       expect(updated.lastName).toBe('Franklin-Updated');
     });
 
+    it('should handle 204 No Content response by returning input owner', async () => {
+      server.use(
+        http.put(`${API_BASE}/owners/:ownerId`, () => {
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+      const input = {
+        id: 1,
+        firstName: 'George',
+        lastName: 'Franklin-204',
+        address: '110 W. Liberty St.',
+        city: 'Madison',
+        telephone: '6085551023',
+        pets: [],
+      };
+      const result = await updateOwner(1, input);
+      expect(result).toEqual(input);
+    });
+
     it('should throw on non-existent owner', async () => {
       await expect(
         updateOwner(999, {

@@ -85,6 +85,22 @@ describe('Visit Management', () => {
       expect(updated.description).toBe('rabies shot - updated');
     });
 
+    it('should handle 204 No Content response by returning input visit', async () => {
+      server.use(
+        http.put(`${API_BASE}/visits/:visitId`, () => {
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+      const input = {
+        id: 1,
+        date: '2013-01-01',
+        description: 'rabies shot - 204',
+        pet: {} as Pet,
+      };
+      const result = await updateVisit(1, input);
+      expect(result).toEqual(input);
+    });
+
     it('should throw on non-existent visit', async () => {
       await expect(
         updateVisit(999, {

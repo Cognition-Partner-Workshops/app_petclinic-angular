@@ -85,6 +85,25 @@ describe('Pet Management', () => {
       expect(updated.name).toBe('Leo Updated');
     });
 
+    it('should handle 204 No Content response by returning input pet', async () => {
+      server.use(
+        http.put(`${API_BASE}/pets/:petId`, () => {
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+      const input = {
+        id: 1,
+        ownerId: 1,
+        name: 'Leo-204',
+        birthDate: '2010-09-07',
+        type: { id: 1, name: 'cat' },
+        owner: {} as Owner,
+        visits: [],
+      };
+      const result = await updatePet(1, input);
+      expect(result).toEqual(input);
+    });
+
     it('should throw on non-existent pet', async () => {
       await expect(
         updatePet(999, {

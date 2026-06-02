@@ -43,6 +43,7 @@ export async function updateVisit(visitId: number, visit: Visit): Promise<Visit>
   if (!response.ok) {
     throw new Error(`Server returned code ${response.status} with body "${await response.text()}"`);
   }
+  if (response.status === 204) return visit;
   return response.json();
 }
 
