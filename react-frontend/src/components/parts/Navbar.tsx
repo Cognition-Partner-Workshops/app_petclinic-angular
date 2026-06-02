@@ -84,18 +84,7 @@ export default function Navbar() {
                 </li>
               </ul>
             </li>
-            <li>
-              <Link to="/pettypes" title="pettypes">
-                <span className="glyphicon glyphicon-heart" aria-hidden="true" />
-                <span> Pet Types</span>
-              </Link>
-            </li>
-            <li>
-              <Link to="/specialties" title="specialties">
-                <span className="glyphicon glyphicon-th-list" aria-hidden="true" />
-                <span> Specialties</span>
-              </Link>
-            </li>
+
           </ul>
         </div>
       </nav>

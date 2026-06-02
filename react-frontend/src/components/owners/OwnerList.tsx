@@ -20,11 +20,11 @@ export default function OwnerList() {
   const handleSearch = () => {
     if (lastName === '') {
       getOwners()
-        .then((data) => setOwners(data))
+        .then((data) => { setOwners(data); setErrorMessage(''); })
         .catch((err) => setErrorMessage(String(err)));
     } else {
       searchOwners(lastName)
-        .then((data) => setOwners(data))
+        .then((data) => { setOwners(data); setErrorMessage(''); })
         .catch((err) => setErrorMessage(String(err)));
     }
   };
@@ -108,16 +108,16 @@ export default function OwnerList() {
                 ))}
               </tbody>
             </table>
-            {isDataReceived && (
-              <div>
-                <button
-                  className="btn btn-default"
-                  onClick={() => navigate('/owners/add')}
-                >
-                  Add Owner
-                </button>
-              </div>
-            )}
+          </div>
+        )}
+        {isDataReceived && (
+          <div>
+            <button
+              className="btn btn-default"
+              onClick={() => navigate('/owners/add')}
+            >
+              Add Owner
+            </button>
           </div>
         )}
       </div>
