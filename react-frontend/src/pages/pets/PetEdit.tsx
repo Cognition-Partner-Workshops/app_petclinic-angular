@@ -28,6 +28,7 @@ export default function PetEdit() {
   const [ownerId, setOwnerId] = useState<number>(0);
   const [ownerName, setOwnerName] = useState('');
   const [currentTypeName, setCurrentTypeName] = useState('');
+  const [originalType, setOriginalType] = useState<PetType | undefined>(undefined);
   const [petTypes, setPetTypes] = useState<PetType[]>([]);
   const [form, setForm] = useState({ name: '', birthDate: '', typeId: '' });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -44,6 +45,7 @@ export default function PetEdit() {
       setPetId(pet.id);
       setOwnerId(pet.ownerId);
       setCurrentTypeName(pet.type?.name || '');
+      setOriginalType(pet.type);
       setForm({
         name: pet.name || '',
         birthDate: pet.birthDate || '',
@@ -70,7 +72,7 @@ export default function PetEdit() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid) return;
-    const selectedType = petTypes.find((t) => t.id === Number(form.typeId));
+    const selectedType = petTypes.find((t) => t.id === Number(form.typeId)) || originalType;
     updatePet(petId, {
       id: petId,
       name: form.name,

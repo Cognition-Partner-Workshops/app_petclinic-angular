@@ -45,12 +45,10 @@ export default function OwnerEdit() {
   });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [serverError, setServerError] = useState('');
-  const [ownerId, setOwnerId] = useState<number>(0);
 
   useEffect(() => {
     if (!id) return;
     getOwnerById(Number(id)).then((owner) => {
-      setOwnerId(owner.id);
       setForm({
         firstName: owner.firstName || '',
         lastName: owner.lastName || '',
@@ -72,8 +70,9 @@ export default function OwnerEdit() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid) return;
-    updateOwner(ownerId, { ...form, id: ownerId } as never)
-      .then(() => navigate(`/owners/${ownerId}`))
+    const numId = Number(id);
+    updateOwner(numId, { ...form, id: numId } as never)
+      .then(() => navigate(`/owners/${id}`))
       .catch((err) => setServerError(extractErrorMessage(err)));
   };
 
@@ -126,7 +125,7 @@ export default function OwnerEdit() {
               <button
                 className="btn btn-default"
                 type="button"
-                onClick={() => navigate(`/owners/${ownerId}`)}
+                onClick={() => navigate(`/owners/${id}`)}
               >
                 Back
               </button>
