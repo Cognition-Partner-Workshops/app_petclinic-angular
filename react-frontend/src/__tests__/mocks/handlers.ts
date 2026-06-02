@@ -243,14 +243,23 @@ export const handlers = [
       id: mockPets.length + 1,
       ...body,
       ownerId,
-      owner: owner ?? {
-        id: ownerId,
-        firstName: '',
-        lastName: '',
-        address: '',
-        city: '',
-        telephone: '',
-      },
+      owner: owner
+        ? {
+            id: owner.id,
+            firstName: owner.firstName,
+            lastName: owner.lastName,
+            address: owner.address,
+            city: owner.city,
+            telephone: owner.telephone,
+          }
+        : {
+            id: ownerId,
+            firstName: '',
+            lastName: '',
+            address: '',
+            city: '',
+            telephone: '',
+          },
       visits: [],
     };
     return HttpResponse.json(newPet, { status: 201 });
@@ -293,13 +302,21 @@ export const handlers = [
         id: mockVisits.length + 1,
         ...body,
         petId,
-        pet: pet ?? {
-          id: petId,
-          name: '',
-          birthDate: '',
-          type: { id: 0, name: '' },
-          ownerId: Number(params.ownerId),
-        },
+        pet: pet
+          ? {
+              id: pet.id,
+              name: pet.name,
+              birthDate: pet.birthDate,
+              type: pet.type,
+              ownerId: pet.ownerId,
+            }
+          : {
+              id: petId,
+              name: '',
+              birthDate: '',
+              type: { id: 0, name: '' },
+              ownerId: Number(params.ownerId),
+            },
       };
       return HttpResponse.json(newVisit, { status: 201 });
     },
