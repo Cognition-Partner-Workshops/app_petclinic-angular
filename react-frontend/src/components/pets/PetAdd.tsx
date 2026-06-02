@@ -198,7 +198,7 @@ export default function PetAdd() {
           <button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : 'Add Pet'}
           </button>{' '}
-          <button type="button" onClick={() => navigate(-1)}>
+          <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate(`/owners/${ownerId ?? ''}`))}>
             Cancel
           </button>
         </div>

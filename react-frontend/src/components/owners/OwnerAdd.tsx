@@ -161,7 +161,7 @@ export default function OwnerAdd() {
           <button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : 'Add Owner'}
           </button>{' '}
-          <button type="button" onClick={() => navigate(-1)}>
+          <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/owners'))}>
             Cancel
           </button>
         </div>

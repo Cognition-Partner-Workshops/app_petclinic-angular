@@ -73,7 +73,7 @@ export default function OwnerDetail() {
     return <p>Loading...</p>;
   }
 
-  if (errorMessage) {
+  if (errorMessage && !owner) {
     return (
       <div>
         <div role="alert" style={{ color: 'red', marginBottom: '1rem' }}>
@@ -96,6 +96,16 @@ export default function OwnerDetail() {
   return (
     <div>
       <h2>Owner Detail</h2>
+
+      {errorMessage && (
+        <div role="alert" style={{ color: 'red', marginBottom: '1rem' }}>
+          {errorMessage}{' '}
+          <button type="button" onClick={() => setErrorMessage(null)}>
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <table>
         <tbody>
           <tr>
@@ -187,7 +197,7 @@ export default function OwnerDetail() {
       </div>
 
       <div style={{ marginTop: '1rem' }}>
-        <button type="button" onClick={() => navigate(-1)}>
+        <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/owners'))}>
           Back
         </button>
       </div>

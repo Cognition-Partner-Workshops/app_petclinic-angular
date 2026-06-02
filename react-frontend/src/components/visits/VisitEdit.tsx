@@ -195,7 +195,7 @@ export default function VisitEdit() {
           <button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : 'Update Visit'}
           </button>{' '}
-          <button type="button" onClick={() => navigate(-1)}>
+          <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate(`/owners/${ownerId ?? ''}`))}>
             Cancel
           </button>
         </div>

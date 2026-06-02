@@ -113,7 +113,7 @@ export default function VisitList() {
       )}
 
       <div style={{ marginTop: '1rem' }}>
-        <button type="button" onClick={() => navigate(-1)}>
+        <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate(`/owners/${ownerId ?? ''}`))}>
           Back
         </button>
       </div>
