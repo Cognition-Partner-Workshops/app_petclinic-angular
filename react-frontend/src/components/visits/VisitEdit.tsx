@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Visit } from '../../types';
+import { Visit, Pet, Owner } from '../../types';
 import { getVisit, updateVisit, deleteVisit } from '../../api/visitService';
+import { getPet } from '../../api/petService';
+import { getOwner } from '../../api/ownerService';
 
 export default function VisitEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [visit, setVisit] = useState<Visit | null>(null);
+  const [pet, setPet] = useState<Pet | null>(null);
+  const [owner, setOwner] = useState<Owner | null>(null);
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -23,11 +27,29 @@ export default function VisitEdit() {
     }
     const load = async () => {
       try {
-        const data = await getVisit(Number(id));
-        if (!cancelled) {
-          setVisit(data);
-          setDate(data.date);
-          setDescription(data.description);
+        const visitData = await getVisit(Number(id));
+        if (cancelled) return;
+        setVisit(visitData);
+        setDate(visitData.date);
+        setDescription(visitData.description);
+
+        const petId = visitData.petId ?? visitData.pet?.id;
+        if (petId) {
+          try {
+            const petData = await getPet(petId);
+            if (cancelled) return;
+            setPet(petData);
+            if (petData.ownerId) {
+              try {
+                const ownerData = await getOwner(petData.ownerId);
+                if (!cancelled) setOwner(ownerData);
+              } catch {
+                // Owner fetch is best-effort
+              }
+            }
+          } catch {
+            // Pet fetch is best-effort for display/navigation
+          }
         }
       } catch {
         if (!cancelled) setErrorMessage('Failed to load visit.');
@@ -40,6 +62,16 @@ export default function VisitEdit() {
       cancelled = true;
     };
   }, [id]);
+
+  const navigateBack = () => {
+    if (owner) {
+      navigate(`/owners/${owner.id}`);
+    } else if (pet?.ownerId) {
+      navigate(`/owners/${pet.ownerId}`);
+    } else {
+      navigate('/visits');
+    }
+  };
 
   const validate = (): boolean => {
     const errors: Record<string, string> = {};
@@ -57,8 +89,7 @@ export default function VisitEdit() {
     const updated: Visit = { ...visit, date, description: description.trim() };
     updateVisit(visit.id, updated)
       .then(() => {
-        const ownerId = visit.pet?.owner?.id ?? visit.pet?.ownerId;
-        navigate(ownerId ? `/owners/${ownerId}` : '/visits');
+        navigateBack();
       })
       .catch(() => {
         setErrorMessage('Failed to update visit.');
@@ -70,8 +101,7 @@ export default function VisitEdit() {
     setErrorMessage(null);
     deleteVisit(visit.id)
       .then(() => {
-        const ownerId = visit.pet?.owner?.id ?? visit.pet?.ownerId;
-        navigate(ownerId ? `/owners/${ownerId}` : '/visits');
+        navigateBack();
       })
       .catch(() => {
         setErrorMessage('Failed to delete visit.');
@@ -94,11 +124,10 @@ export default function VisitEdit() {
       {!visit && !errorMessage && <p>Visit not found.</p>}
       {visit && (
         <form onSubmit={handleSubmit} noValidate>
-          {visit.pet && (
+          {pet && (
             <p>
-              Pet: {visit.pet.name}
-              {visit.pet.owner &&
-                ` (Owner: ${visit.pet.owner.firstName} ${visit.pet.owner.lastName})`}
+              Pet: {pet.name}
+              {owner && ` (Owner: ${owner.firstName} ${owner.lastName})`}
             </p>
           )}
           <div style={{ marginBottom: 8 }}>

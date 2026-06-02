@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Pet, PetType } from '../../types';
+import { Pet, PetType, Owner } from '../../types';
 import { getPet, updatePet, deletePet } from '../../api/petService';
 import { getPetTypes } from '../../api/petTypeService';
+import { getOwner } from '../../api/ownerService';
 
 export default function PetEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [pet, setPet] = useState<Pet | null>(null);
+  const [owner, setOwner] = useState<Owner | null>(null);
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [typeId, setTypeId] = useState<number>(0);
@@ -27,12 +29,19 @@ export default function PetEdit() {
     const load = async () => {
       try {
         const [petData, types] = await Promise.all([getPet(Number(id)), getPetTypes()]);
-        if (!cancelled) {
-          setPet(petData);
-          setName(petData.name);
-          setBirthDate(petData.birthDate);
-          setTypeId(petData.type?.id ?? 0);
-          setPetTypes(types);
+        if (cancelled) return;
+        setPet(petData);
+        setName(petData.name);
+        setBirthDate(petData.birthDate);
+        setTypeId(petData.type?.id ?? 0);
+        setPetTypes(types);
+        if (petData.ownerId) {
+          try {
+            const ownerData = await getOwner(petData.ownerId);
+            if (!cancelled) setOwner(ownerData);
+          } catch {
+            // Owner fetch is best-effort for display/navigation
+          }
         }
       } catch {
         if (!cancelled) setErrorMessage('Failed to load pet.');
@@ -45,6 +54,14 @@ export default function PetEdit() {
       cancelled = true;
     };
   }, [id]);
+
+  const navigateBack = () => {
+    if (pet?.ownerId) {
+      navigate(`/owners/${pet.ownerId}`);
+    } else {
+      navigate('/pets');
+    }
+  };
 
   const validate = (): boolean => {
     const errors: Record<string, string> = {};
@@ -73,7 +90,7 @@ export default function PetEdit() {
     };
     updatePet(pet.id, updated)
       .then(() => {
-        navigate(pet.owner ? `/owners/${pet.owner.id}` : '/pets');
+        navigateBack();
       })
       .catch(() => {
         setErrorMessage('Failed to update pet.');
@@ -85,7 +102,7 @@ export default function PetEdit() {
     setErrorMessage(null);
     deletePet(pet.id)
       .then(() => {
-        navigate(pet.owner ? `/owners/${pet.owner.id}` : '/pets');
+        navigateBack();
       })
       .catch(() => {
         setErrorMessage('Failed to delete pet.');
@@ -108,9 +125,9 @@ export default function PetEdit() {
       {!pet && !errorMessage && <p>Pet not found.</p>}
       {pet && (
         <form onSubmit={handleSubmit} noValidate>
-          {pet.owner && (
+          {owner && (
             <p>
-              Owner: {pet.owner.firstName} {pet.owner.lastName}
+              Owner: {owner.firstName} {owner.lastName}
             </p>
           )}
           <div style={{ marginBottom: 8 }}>
