@@ -26,8 +26,9 @@ export default function VisitEdit() {
       getVisitById(Number(visitId))
         .then((visit) => {
           setForm({ date: visit.date, description: visit.description });
-          if (visit.petId) {
-            getPetById(visit.petId).then((pet) => {
+          const petId = visit.petId ?? visit.pet?.id;
+          if (petId) {
+            getPetById(petId).then((pet) => {
               setCurrentPet(pet);
               setCurrentPetType(pet.type);
               if (pet.ownerId) {
