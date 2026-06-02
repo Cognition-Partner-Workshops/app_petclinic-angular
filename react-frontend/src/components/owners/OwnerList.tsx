@@ -20,6 +20,7 @@ export default function OwnerList() {
   }, []);
 
   function handleSearch() {
+    setErrorMessage('');
     if (lastName === '') {
       getOwners()
         .then((data) => setOwners(data))
@@ -62,7 +63,7 @@ export default function OwnerList() {
         </div>
       </form>
 
-      {isDataReceived && owners === null && (
+      {isDataReceived && owners === null && !errorMessage && (
         <div>No owners with LastName starting with &quot;{lastName}&quot;</div>
       )}
 
