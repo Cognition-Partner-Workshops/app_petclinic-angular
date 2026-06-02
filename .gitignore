@@ -42,3 +42,4 @@ testem.log
 .DS_Store
 Thumbs.db
 *.iml
+react-frontend/node_modules/
