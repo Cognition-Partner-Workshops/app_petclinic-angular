@@ -49,7 +49,7 @@ function OwnerEdit() {
     e.preventDefault();
     setTouched({ firstName: true, lastName: true, address: true, city: true, telephone: true });
     if (!isValid) return;
-    ownerService.updateOwner(Number(id), { id: Number(id), firstName, lastName, address, city, telephone, pets: [] })
+    ownerService.updateOwner(Number(id), { id: Number(id), firstName, lastName, address, city, telephone })
       .then(() => navigate(`/owners/${id}`))
       .catch((err) => setErrorMessage(extractErrorMessage(err)));
   }
