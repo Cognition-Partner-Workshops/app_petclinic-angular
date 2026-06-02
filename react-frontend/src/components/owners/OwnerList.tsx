@@ -25,7 +25,7 @@ export default function OwnerList() {
     } else {
       searchOwners(lastName)
         .then((data) => setOwners(data))
-        .catch(() => setOwners(null));
+        .catch((err) => setErrorMessage(String(err)));
     }
   };
 

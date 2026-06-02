@@ -67,7 +67,7 @@ export default function PetAdd() {
           <div className="form-group">
             <label htmlFor="type" className="col-sm-2 control-label">Type</label>
             <div className="col-sm-10">
-              <select className="form-control" id="type" value={selectedTypeId} onChange={(e) => setSelectedTypeId(Number(e.target.value))} required>
+              <select className="form-control" id="type" value={selectedTypeId} onChange={(e) => setSelectedTypeId(e.target.value ? Number(e.target.value) : '')} required>
                 <option value="">Select a type</option>
                 {petTypes.map((t) => (
                   <option key={t.id} value={t.id}>{t.name}</option>
