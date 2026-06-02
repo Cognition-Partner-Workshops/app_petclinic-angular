@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw';
 
 const BASE_URL = 'http://localhost:9966/petclinic/api';
 
-const mockOwners = [
+const mockOwners: Record<string, unknown>[] = [
   {
     id: 1,
     firstName: 'George',
@@ -70,14 +70,14 @@ export const handlers = [
     const url = new URL(request.url);
     const lastName = url.searchParams.get('lastName');
     if (lastName) {
-      const filtered = mockOwners.filter((o) => o.lastName.toLowerCase().includes(lastName.toLowerCase()));
+      const filtered = mockOwners.filter((o) => (o.lastName as string).toLowerCase().includes(lastName.toLowerCase()));
       return HttpResponse.json(filtered);
     }
     return HttpResponse.json(mockOwners);
   }),
 
   http.get(`${BASE_URL}/owners/:ownerId`, ({ params }) => {
-    const owner = mockOwners.find((o) => o.id === Number(params.ownerId));
+    const owner = mockOwners.find((o) => (o.id as number) === Number(params.ownerId));
     if (!owner) {
       return new HttpResponse(null, { status: 404 });
     }
@@ -87,6 +87,7 @@ export const handlers = [
   http.post(`${BASE_URL}/owners`, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     const newOwner = { id: 3, ...body, pets: [] };
+    mockOwners.push(newOwner);
     return HttpResponse.json(newOwner, { status: 201 });
   }),
 
