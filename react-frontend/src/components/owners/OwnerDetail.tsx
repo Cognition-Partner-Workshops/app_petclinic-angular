@@ -50,9 +50,7 @@ function OwnerDetail() {
   function handleDeletePet(pet: Pet) {
     petService.deletePet(pet.id)
       .then(() => {
-        if (owner) {
-          setOwner({ ...owner, pets: owner.pets.filter((p) => p.id !== pet.id) });
-        }
+        setOwner((prev) => prev ? { ...prev, pets: prev.pets.filter((p) => p.id !== pet.id) } : prev);
       })
       .catch((err) => setErrorMessage(extractErrorMessage(err)));
   }

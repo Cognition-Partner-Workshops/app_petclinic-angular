@@ -78,7 +78,7 @@ function PetAdd() {
         <div className={`form-group ${touched.type && errors.type ? 'has-error' : ''}`}>
           <label className="col-label">Type</label>
           <select className="form-control" value={typeId}
-            onChange={(e) => setTypeId(Number(e.target.value))} onBlur={() => handleBlur('type')}>
+            onChange={(e) => setTypeId(e.target.value ? Number(e.target.value) : '')} onBlur={() => handleBlur('type')}>
             <option value="">-- Select --</option>
             {petTypes.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
