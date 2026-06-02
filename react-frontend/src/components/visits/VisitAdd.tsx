@@ -65,6 +65,10 @@ export default function VisitAdd() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    if (hasPetParam && !selectedPetId) {
+      setErrorMessage('Pet could not be loaded. Please go back and try again.');
+      return;
+    }
     if (!validate()) return;
     const pet = pets.find((p) => p.id === selectedPetId);
     if (!pet) {

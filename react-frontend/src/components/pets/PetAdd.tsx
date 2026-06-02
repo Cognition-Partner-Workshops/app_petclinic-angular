@@ -82,6 +82,10 @@ export default function PetAdd() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    if (hasOwnerParam && !selectedOwnerId) {
+      setErrorMessage('Owner could not be loaded. Please go back and try again.');
+      return;
+    }
     if (!validate()) return;
     const selectedType = petTypes.find((t) => t.id === typeId);
     if (!selectedType) {
