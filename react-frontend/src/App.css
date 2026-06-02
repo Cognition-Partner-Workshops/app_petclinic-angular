@@ -1,0 +1,39 @@
+/* Bootstrap-compatible basic styles */
+.container-fluid {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.xd-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.has-error .form-control {
+  border-color: #a94442;
+}
+
+.has-success .form-control {
+  border-color: #3c763d;
+}
+
+.help-block {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  color: #a94442;
+  font-size: 0.85em;
+}
+
+.alert-danger {
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
