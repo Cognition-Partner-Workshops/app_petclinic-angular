@@ -43,7 +43,7 @@ export default function VisitAdd() {
         setCurrentPetType(pet.type);
         setVisits(pet.visits || []);
         if (pet.ownerId) {
-          getOwnerById(pet.ownerId).then((owner) => setCurrentOwner(owner));
+          getOwnerById(pet.ownerId).then((owner) => setCurrentOwner(owner)).catch((err: string) => setErrorMessage(err));
         }
       })
       .catch((err: string) => setErrorMessage(err));

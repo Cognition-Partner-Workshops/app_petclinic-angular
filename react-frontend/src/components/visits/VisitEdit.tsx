@@ -155,7 +155,7 @@ export default function VisitEdit() {
 
         <div className="form-group">
           <div className="col-sm-offset-2 col-sm-10">
-            <button className="btn btn-default" type="button" onClick={() => navigate(`/owners/${currentOwner.id}`)}>
+            <button className="btn btn-default" type="button" onClick={() => navigate(currentOwner.id ? `/owners/${currentOwner.id}` : '/visits')}>
               Back
             </button>
             <button className="btn btn-default" type="submit" disabled={!isFormValid()}>

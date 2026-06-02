@@ -32,7 +32,7 @@ export default function OwnerDetail() {
       deletePet(petId)
         .then(() => {
           if (id) {
-            getOwnerById(Number(id)).then((data) => setOwner(data));
+            getOwnerById(Number(id)).then((data) => setOwner(data)).catch((err: string) => setErrorMessage(err));
           }
         })
         .catch((err: string) => setErrorMessage(err));
@@ -44,7 +44,7 @@ export default function OwnerDetail() {
       deleteVisit(visitId)
         .then(() => {
           if (id) {
-            getOwnerById(Number(id)).then((data) => setOwner(data));
+            getOwnerById(Number(id)).then((data) => setOwner(data)).catch((err: string) => setErrorMessage(err));
           }
         })
         .catch((err: string) => setErrorMessage(err));
