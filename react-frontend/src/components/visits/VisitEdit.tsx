@@ -36,7 +36,7 @@ function VisitEdit() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setTouched({ date: true, description: true });
-    if (!isValid || !id) return;
+    if (!isValid || !id || !currentPet) return;
     visitService.updateVisit(Number(id), { id: Number(id), date, description, pet: currentPet! })
       .then(() => navigate('/visits'))
       .catch((err) => setErrorMessage(extractErrorMessage(err)));
@@ -61,7 +61,7 @@ function VisitEdit() {
         </div>
         <div className="form-actions">
           <button type="button" className="btn" onClick={() => navigate('/visits')}>Back</button>
-          <button type="submit" className="btn btn-primary" disabled={!isValid}>Update Visit</button>
+          <button type="submit" className="btn btn-primary" disabled={!isValid || !currentPet}>Update Visit</button>
         </div>
       </form>
     </div>
