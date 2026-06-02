@@ -22,9 +22,9 @@ export default function OwnerDetail() {
   const handleDeletePet = (petId: number) => {
     deletePet(petId)
       .then(() => {
-        if (owner) {
-          setOwner({ ...owner, pets: owner.pets.filter((p) => p.id !== petId) });
-        }
+        setOwner((prev) =>
+          prev ? { ...prev, pets: prev.pets.filter((p) => p.id !== petId) } : prev
+        );
       })
       .catch((err) => setErrorMessage(extractErrorMessage(err)));
   };
@@ -32,16 +32,18 @@ export default function OwnerDetail() {
   const handleDeleteVisit = (visitId: number, petId: number) => {
     deleteVisit(visitId)
       .then(() => {
-        if (owner) {
-          setOwner({
-            ...owner,
-            pets: owner.pets.map((p) =>
-              p.id === petId
-                ? { ...p, visits: p.visits.filter((v) => v.id !== visitId) }
-                : p
-            ),
-          });
-        }
+        setOwner((prev) =>
+          prev
+            ? {
+                ...prev,
+                pets: prev.pets.map((p) =>
+                  p.id === petId
+                    ? { ...p, visits: p.visits.filter((v) => v.id !== visitId) }
+                    : p
+                ),
+              }
+            : prev
+        );
       })
       .catch((err) => setErrorMessage(extractErrorMessage(err)));
   };
