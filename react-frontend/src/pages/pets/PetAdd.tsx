@@ -15,7 +15,7 @@ interface FormErrors {
 function validatePet(values: { name: string; birthDate: string; typeId: string }): FormErrors {
   const errors: FormErrors = {};
   if (!values.name) errors.name = 'Name is required';
-  else if (!/^[A-Za-z0-9]/.test(values.name)) errors.name = 'Name must begin with a letter';
+  else if (!/^[A-Za-z]/.test(values.name)) errors.name = 'Name must begin with a letter';
   if (!values.birthDate) errors.birthDate = 'BirthDate is required';
   if (!values.typeId) errors.type = 'Pet type is required';
   return errors;

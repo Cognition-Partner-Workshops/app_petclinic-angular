@@ -37,8 +37,9 @@ export default function VisitEdit() {
         date: visit.date || '',
         description: visit.description || '',
       });
-      if (visit.petId) {
-        getPetById(visit.petId).then((pet) => {
+      const petIdToFetch = visit.petId ?? visit.pet?.id;
+      if (petIdToFetch) {
+        getPetById(petIdToFetch).then((pet) => {
           setCurrentPet(pet);
           setCurrentPetType(pet.type);
           getOwnerById(pet.ownerId)
