@@ -14,6 +14,7 @@ export default function PetForm({ mode }: PetFormProps) {
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [typeId, setTypeId] = useState<number>(1);
+  const [petOwnerId, setPetOwnerId] = useState<number>(1);
   const [petTypes, setPetTypes] = useState<PetType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -39,6 +40,7 @@ export default function PetForm({ mode }: PetFormProps) {
               setName(pet.name);
               setBirthDate(pet.birthDate);
               setTypeId(pet.type.id);
+              setPetOwnerId(pet.ownerId);
               setIsLoading(false);
             })
             .catch((err: Error) => {
@@ -82,7 +84,7 @@ export default function PetForm({ mode }: PetFormProps) {
       fetch(`${API_BASE}/pets/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: Number(id), name, birthDate, type: selectedType, ownerId: Number(ownerId || 1) }),
+        body: JSON.stringify({ id: Number(id), name, birthDate, type: selectedType, ownerId: petOwnerId }),
       })
         .then((res) => {
           if (!res.ok) throw new Error(`HTTP ${res.status}`);

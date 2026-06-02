@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import type { Owner } from '../types';
 
 const API_BASE = 'http://localhost:9966/petclinic/api';
@@ -44,9 +44,9 @@ export default function OwnerList() {
       <ul>
         {owners.map((owner) => (
           <li key={owner.id}>
-            <a href={`/owners/${owner.id}`}>
+            <Link to={`/owners/${owner.id}`}>
               {owner.firstName} {owner.lastName}
-            </a>
+            </Link>
             {' - '}{owner.city} - {owner.telephone}
           </li>
         ))}

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import type { Visit } from '../types';
 
 const API_BASE = 'http://localhost:9966/petclinic/api';
 
@@ -16,8 +17,30 @@ export default function VisitForm({ mode }: VisitFormProps) {
   const navigate = useNavigate();
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(mode === 'edit');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  useEffect(() => {
+    setError('');
+    setSuccessMsg('');
+    if (mode === 'edit' && id) {
+      fetch(`${API_BASE}/visits/${id}`)
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then((data: Visit) => {
+          setDate(data.date);
+          setDescription(data.description);
+          setIsLoading(false);
+        })
+        .catch((err: Error) => {
+          setError(err.message);
+          setIsLoading(false);
+        });
+    }
+  }, [mode, id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +82,8 @@ export default function VisitForm({ mode }: VisitFormProps) {
         });
     }
   };
+
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
