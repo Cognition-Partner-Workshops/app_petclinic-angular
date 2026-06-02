@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Visit } from '../../types';
 import { deleteVisit } from '../../api/visits';
@@ -10,6 +10,10 @@ interface Props {
 export default function VisitList({ visits: initialVisits }: Props) {
   const navigate = useNavigate();
   const [visits, setVisits] = useState<Visit[]>(initialVisits);
+
+  useEffect(() => {
+    setVisits(initialVisits);
+  }, [initialVisits]);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleDelete = (visit: Visit) => {
