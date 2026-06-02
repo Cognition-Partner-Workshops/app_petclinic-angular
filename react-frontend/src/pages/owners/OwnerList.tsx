@@ -26,7 +26,13 @@ export default function OwnerList() {
     } else {
       searchOwners(lastName)
         .then((data) => setOwners(data))
-        .catch(() => setOwners(null));
+        .catch((err) => {
+          if (err.response?.status === 404) {
+            setOwners(null);
+          } else {
+            setErrorMessage(extractErrorMessage(err));
+          }
+        });
     }
   };
 

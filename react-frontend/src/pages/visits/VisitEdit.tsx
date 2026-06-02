@@ -169,7 +169,7 @@ export default function VisitEdit() {
               <button
                 className="btn btn-default"
                 type="submit"
-                disabled={!isValid}
+                disabled={!isValid || !currentPet}
               >
                 Update Visit
               </button>
