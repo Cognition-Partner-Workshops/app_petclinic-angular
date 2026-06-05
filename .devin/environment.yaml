@@ -1,0 +1,32 @@
+# https://docs.devin.ai/onboard-devin/environment-yaml
+# Commands run from the repo root.
+
+# One-time setup (install system tools, global CLIs).
+initialize: |
+  npm install -g @angular/cli@16.2.0
+
+# Install project dependencies (runs during builds, surfaced to agent at session start).
+maintenance: |
+  npm install --legacy-peer-deps
+
+# Reference info for agent
+knowledge:
+  - name: chrome-bin
+    contents: |
+      Set CHROME_BIN before running headless tests:
+      export CHROME_BIN=/opt/.devin/chrome/chrome/linux-133.0.6943.126/chrome-linux64/chrome
+  - name: lint
+    contents: |
+      npm run lint
+  - name: test
+    contents: |
+      export CHROME_BIN=/opt/.devin/chrome/chrome/linux-133.0.6943.126/chrome-linux64/chrome
+      npm run test-headless
+  - name: build
+    contents: |
+      npm run build
+  - name: run
+    contents: |
+      npm run start
+      # Dev server runs at http://localhost:4200/petclinic/
+      # Backend API expected at http://localhost:9966/petclinic/api/
