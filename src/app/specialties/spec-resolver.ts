@@ -16,23 +16,24 @@
  *
  */
 
-import {Injectable} from '@angular/core';
-import {Specialty} from './specialty';
+import { Injectable, inject } from '@angular/core';
+import { Specialty } from './specialty';
 
-import {SpecialtyService} from './specialty.service';
-import {Observable} from 'rxjs';
+import { SpecialtyService } from './specialty.service';
+import { Observable } from 'rxjs';
 
 /**
  * @author Vitaliy Fedoriv
  */
 
 @Injectable()
-export class SpecResolver  {
+export class SpecResolver {
+  private specialtyService = inject(SpecialtyService);
 
-  constructor(private specialtyService: SpecialtyService) { }
+
+  constructor() {}
 
   resolve(): Observable<Specialty[]> | Promise<Specialty[]> | Specialty[] {
     return this.specialtyService.getSpecialties();
   }
-
 }
