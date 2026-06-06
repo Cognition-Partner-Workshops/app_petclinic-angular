@@ -1,42 +1,85 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
-
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { inject, TestBed, waitForAsync } from '@angular/core/testing';
-import {VetService} from './vet.service';
-import {HttpClient} from '@angular/common/http';
-import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { VetService } from './vet.service';
+import { HttpErrorHandler } from '../error.service';
+import { Vet } from './vet';
+import { environment } from '../../environments/environment';
 
 describe('VetService', () => {
+  let service: VetService;
+  let httpMock: HttpTestingController;
+  const entityUrl = environment.REST_API_URL + 'vets';
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // Import the HttpClient mocking services
       imports: [HttpClientTestingModule],
-      providers: [VetService]
+      providers: [VetService, HttpErrorHandler]
     });
+    service = TestBed.inject(VetService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('should ...', waitForAsync(inject([HttpTestingController], (vetService: VetService, http: HttpClient) => {
-    expect(vetService).toBeTruthy();
-  })));
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('should return vets on getVets', () => {
+    const mockVets: Vet[] = [
+      { id: 1, firstName: 'James', lastName: 'Carter', specialties: [] },
+      { id: 2, firstName: 'Helen', lastName: 'Leary', specialties: [] }
+    ];
+    service.getVets().subscribe(vets => {
+      expect(vets).toEqual(mockVets);
+      expect(vets.length).toBe(2);
+    });
+    const req = httpMock.expectOne(entityUrl);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockVets);
+  });
+
+  it('should return a vet by id on getVetById', () => {
+    const mockVet: Vet = { id: 1, firstName: 'James', lastName: 'Carter', specialties: [] };
+    service.getVetById('1').subscribe(vet => {
+      expect(vet).toEqual(mockVet);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockVet);
+  });
+
+  it('should update a vet on updateVet', () => {
+    const mockVet: Vet = { id: 1, firstName: 'James', lastName: 'Carter', specialties: [] };
+    service.updateVet('1', mockVet).subscribe(vet => {
+      expect(vet).toEqual(mockVet);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(mockVet);
+    req.flush(mockVet);
+  });
+
+  it('should add a vet on addVet', () => {
+    const mockVet: Vet = { id: null, firstName: 'New', lastName: 'Vet', specialties: [] };
+    const returnVet: Vet = { id: 3, firstName: 'New', lastName: 'Vet', specialties: [] };
+    service.addVet(mockVet).subscribe(vet => {
+      expect(vet).toEqual(returnVet);
+    });
+    const req = httpMock.expectOne(entityUrl);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(mockVet);
+    req.flush(returnVet);
+  });
+
+  it('should delete a vet on deleteVet', () => {
+    service.deleteVet('1').subscribe(response => {
+      expect(response).toBe(204);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(204);
+  });
 });

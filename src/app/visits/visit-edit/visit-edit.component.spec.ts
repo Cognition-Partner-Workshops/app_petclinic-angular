@@ -31,7 +31,7 @@ import {VisitService} from '../visit.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
 import {Visit} from '../visit';
-import {Observable, of} from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import {Pet} from '../../pets/pet';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -43,9 +43,15 @@ class VisitServiceStub {
   getVisitById(visitId: string): Observable<Visit> {
     return of();
   }
+  updateVisit(visitId: string, visit: Visit): Observable<Visit> {
+    return of();
+  }
 }
 
 class OwnerServiceStub {
+  getOwnerById(ownerId: string): Observable<any> {
+    return of();
+  }
 }
 
 class PetServiceStub {
@@ -114,5 +120,48 @@ describe('VisitEditComponent', () => {
 
   it('should create VisitEditComponent', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should load visit, pet and owner on init', () => {
+    const petService = fixture.debugElement.injector.get(PetService);
+    const ownerService = fixture.debugElement.injector.get(OwnerService);
+    spyOn(ownerService, 'getOwnerById').and.returnValue(of(testPet.owner));
+    spyOn(petService, 'getPetById').and.returnValue(of(testPet));
+    spy.and.returnValue(of(testVisit));
+    component.ngOnInit();
+    expect(component.visit).toEqual(testVisit);
+    expect(component.currentPet).toEqual(testPet);
+    expect(component.currentOwner).toEqual(testPet.owner);
+  });
+
+  it('should set errorMessage on getVisitById error', () => {
+    spy.and.returnValue(throwError('visit error'));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('visit error');
+  });
+
+  it('should submit visit and navigate to owner detail', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.currentPet = testPet;
+    component.currentOwner = testPet.owner;
+    spyOn(visitService, 'updateVisit').and.returnValue(of(testVisit));
+    component.onSubmit({ ...testVisit, date: '2016-09-07' });
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', testPet.owner.id]);
+  });
+
+  it('should set errorMessage on submit error', () => {
+    component.currentPet = testPet;
+    spyOn(visitService, 'updateVisit').and.returnValue(throwError('update error'));
+    component.onSubmit({ ...testVisit, date: '2016-09-07' });
+    expect(component.errorMessage).toBe('update error');
+  });
+
+  it('should navigate to owner detail on gotoOwnerDetail', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.currentOwner = { id: 5 } as any;
+    component.gotoOwnerDetail();
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', 5]);
   });
 });

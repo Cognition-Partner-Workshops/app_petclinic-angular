@@ -36,13 +36,16 @@ import { OwnerService } from '../owner.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
 import { Owner } from '../owner';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { OwnerListComponent } from '../owner-list/owner-list.component';
 
 class OwnserServiceStub {
   getOwnerById(): Observable<Owner> {
     return of({ id: 1, firstName: 'James' } as Owner);
+  }
+  updateOwner(ownerId: string, owner: Owner): Observable<Owner> {
+    return of(owner);
   }
 }
 
@@ -96,5 +99,35 @@ describe('OwnerEditComponent', () => {
     updateOwnerButton.click();
     expect(component.onSubmit).toHaveBeenCalled();
   }));
+
+  it('should set errorMessage on getOwnerById error', () => {
+    const ownerServiceLocal = fixture.debugElement.injector.get(OwnerService);
+    spyOn(ownerServiceLocal, 'getOwnerById').and.returnValue(throwError('load error'));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('load error');
+  });
+
+  it('should submit owner and navigate to owner detail', () => {
+    const ownerServiceLocal = fixture.debugElement.injector.get(OwnerService);
+    const testOwner: Owner = { id: 1, firstName: 'James', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
+    spyOn(ownerServiceLocal, 'updateOwner').and.returnValue(of(testOwner));
+    component.onSubmit(testOwner);
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
+  });
+
+  it('should set errorMessage on submit error', () => {
+    const ownerServiceLocal = fixture.debugElement.injector.get(OwnerService);
+    const testOwner: Owner = { id: 1, firstName: 'James', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
+    spyOn(ownerServiceLocal, 'updateOwner').and.returnValue(throwError('update error'));
+    component.onSubmit(testOwner);
+    expect(component.errorMessage).toBe('update error');
+  });
+
+  it('should navigate to owner detail on gotoOwnerDetail', () => {
+    const testOwner: Owner = { id: 5, firstName: 'Test', lastName: 'Owner', address: '', city: '', telephone: '', pets: [] };
+    component.gotoOwnerDetail(testOwner);
+    expect(component.errorMessage).toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', 5]);
+  });
 
 });

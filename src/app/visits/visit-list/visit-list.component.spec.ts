@@ -32,7 +32,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
 import {Visit} from '../visit';
 import {Pet} from '../../pets/pet';
-import {Observable, of} from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import Spy = jasmine.Spy;
 
 class VisitServiceStub {
@@ -109,6 +109,25 @@ describe('VisitListComponent', () => {
     fixture.detectChanges();
     component.deleteVisit(component.visits[0]);
     expect(spy.calls.any()).toBe(true, 'deleteVisit called');
+  });
+
+  it('should remove visit from list on successful delete', () => {
+    component.deleteVisit(testVisits[0]);
+    expect(component.visits.length).toBe(0);
+    expect(component.noVisits).toBe(true);
+  });
+
+  it('should set errorMessage on deleteVisit error', () => {
+    spy.and.returnValue(throwError('delete error'));
+    component.deleteVisit(testVisits[0]);
+    expect(component.errorMessage).toBe('delete error');
+  });
+
+  it('should navigate to edit visit on editVisit', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.editVisit(testVisits[0]);
+    expect(router.navigate).toHaveBeenCalledWith(['/visits', 1, 'edit']);
   });
 
 });

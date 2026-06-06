@@ -31,7 +31,7 @@ import {SpecialtyService} from '../specialty.service';
 import {Specialty} from '../specialty';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
-import {Observable, of} from 'rxjs/index';
+import {Observable, of, throwError} from 'rxjs';
 import Spy = jasmine.Spy;
 
 class SpecialityServiceStub {
@@ -92,6 +92,53 @@ describe('SpecialtyListComponent', () => {
     fixture.detectChanges();
     component.deleteSpecialty(component.specialties[0]);
     expect(spy.calls.any()).toBe(true, 'deleteSpecialty called');
+  });
+
+  it('should remove specialty from list on successful delete', () => {
+    component.deleteSpecialty(testSpecialties[0]);
+    expect(component.specialties.length).toBe(0);
+  });
+
+  it('should set errorMessage on deleteSpecialty error', () => {
+    spy.and.returnValue(throwError('delete error'));
+    component.deleteSpecialty(testSpecialties[0]);
+    expect(component.errorMessage).toBe('delete error');
+  });
+
+  it('should load specialties on init', () => {
+    const mockSpecs: Specialty[] = [{ id: 1, name: 'radiology' }, { id: 2, name: 'surgery' }];
+    spyOn(specialtyService, 'getSpecialties').and.returnValue(of(mockSpecs));
+    component.ngOnInit();
+    expect(component.specialties).toEqual(mockSpecs);
+    expect(component.isSpecialitiesDataReceived).toBe(true);
+  });
+
+  it('should add specialty to list on onNewSpecialty', () => {
+    const newSpec: Specialty = { id: 3, name: 'dentistry' };
+    component.onNewSpecialty(newSpec);
+    expect(component.specialties).toContain(newSpec);
+  });
+
+  it('should toggle isInsert on showAddSpecialtyComponent', () => {
+    expect(component.isInsert).toBe(false);
+    component.showAddSpecialtyComponent();
+    expect(component.isInsert).toBe(true);
+    component.showAddSpecialtyComponent();
+    expect(component.isInsert).toBe(false);
+  });
+
+  it('should navigate to edit specialty on showEditSpecialtyComponent', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.showEditSpecialtyComponent(testSpecialties[0]);
+    expect(router.navigate).toHaveBeenCalledWith(['/specialties', '1', 'edit']);
+  });
+
+  it('should navigate to home on gotoHome', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.gotoHome();
+    expect(router.navigate).toHaveBeenCalledWith(['/welcome']);
   });
 
 });

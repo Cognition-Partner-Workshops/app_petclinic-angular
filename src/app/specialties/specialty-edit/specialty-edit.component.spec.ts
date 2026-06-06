@@ -30,11 +30,14 @@ import {SpecialtyService} from '../specialty.service';
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
-import {Observable, of} from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import Spy = jasmine.Spy;
 
 class SpecialityServiceStub {
   getSpecialtyById(specId: string): Observable<Specialty> {
+    return of();
+  }
+  updateSpecialty(specId: string, specialty: Specialty): Observable<Specialty> {
     return of();
   }
 }
@@ -77,5 +80,38 @@ describe('SpecialtyEditComponent', () => {
 
   it('should create SpecialtyEditComponent', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should load specialty on init', () => {
+    spy.and.returnValue(of(testSpecialty));
+    component.ngOnInit();
+    expect(component.specialty).toEqual(testSpecialty);
+  });
+
+  it('should set errorMessage on getSpecialtyById error', () => {
+    spy.and.returnValue(throwError('load error'));
+    component.ngOnInit();
+    expect(component.errorMessage).toBe('load error');
+  });
+
+  it('should submit specialty and navigate back', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    spyOn(specialtyService, 'updateSpecialty').and.returnValue(of(testSpecialty));
+    component.onSubmit(testSpecialty);
+    expect(router.navigate).toHaveBeenCalledWith(['/specialties']);
+  });
+
+  it('should set errorMessage on submit error', () => {
+    spyOn(specialtyService, 'updateSpecialty').and.returnValue(throwError('update error'));
+    component.onSubmit(testSpecialty);
+    expect(component.errorMessage).toBe('update error');
+  });
+
+  it('should navigate back on onBack', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.onBack();
+    expect(router.navigate).toHaveBeenCalledWith(['/specialties']);
   });
 });

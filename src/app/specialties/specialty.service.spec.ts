@@ -1,42 +1,83 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
-
-/* tslint:disable:no-unused-variable */
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { inject, TestBed, waitForAsync } from '@angular/core/testing';
-import {SpecialtyService} from './specialty.service';
-import {HttpClient} from '@angular/common/http';
-import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { SpecialtyService } from './specialty.service';
+import { HttpErrorHandler } from '../error.service';
+import { Specialty } from './specialty';
+import { environment } from '../../environments/environment';
 
 describe('SpecialtyService', () => {
+  let service: SpecialtyService;
+  let httpMock: HttpTestingController;
+  const entityUrl = environment.REST_API_URL + 'specialties';
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // Import the HttpClient mocking services
       imports: [HttpClientTestingModule],
-      providers: [SpecialtyService]
+      providers: [SpecialtyService, HttpErrorHandler]
     });
+    service = TestBed.inject(SpecialtyService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('should ...', waitForAsync(inject([HttpTestingController], (specialtyService: SpecialtyService, http: HttpClient) => {
-    expect(specialtyService).toBeTruthy();
-  })));
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('should return specialties on getSpecialties', () => {
+    const mockSpecialties: Specialty[] = [
+      { id: 1, name: 'radiology' },
+      { id: 2, name: 'surgery' }
+    ];
+    service.getSpecialties().subscribe(specialties => {
+      expect(specialties.length).toBe(2);
+      expect(specialties).toEqual(mockSpecialties);
+    });
+    const req = httpMock.expectOne(entityUrl);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockSpecialties);
+  });
+
+  it('should return a specialty by id on getSpecialtyById', () => {
+    const mockSpecialty: Specialty = { id: 1, name: 'radiology' };
+    service.getSpecialtyById('1').subscribe(specialty => {
+      expect(specialty).toEqual(mockSpecialty);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockSpecialty);
+  });
+
+  it('should add a specialty on addSpecialty', () => {
+    const mockSpecialty: Specialty = { id: null, name: 'dentistry' };
+    const returnSpecialty: Specialty = { id: 3, name: 'dentistry' };
+    service.addSpecialty(mockSpecialty).subscribe(specialty => {
+      expect(specialty).toEqual(returnSpecialty);
+    });
+    const req = httpMock.expectOne(entityUrl);
+    expect(req.request.method).toBe('POST');
+    req.flush(returnSpecialty);
+  });
+
+  it('should update a specialty on updateSpecialty', () => {
+    const mockSpecialty: Specialty = { id: 1, name: 'radiology updated' };
+    service.updateSpecialty('1', mockSpecialty).subscribe(specialty => {
+      expect(specialty).toEqual(mockSpecialty);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('PUT');
+    req.flush(mockSpecialty);
+  });
+
+  it('should delete a specialty on deleteSpecialty', () => {
+    service.deleteSpecialty('1').subscribe(response => {
+      expect(response).toBe(204);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(204);
+  });
 });

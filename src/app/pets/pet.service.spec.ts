@@ -1,43 +1,80 @@
-/*
- *
- *  * Copyright 2016-2017 the original author or authors.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *
- */
-
-/* tslint:disable:no-unused-variable */
-
-
-/**
- * @author Vitaliy Fedoriv
- */
-
-import { inject, TestBed, waitForAsync } from '@angular/core/testing';
-import {PetService} from './pet.service';
-import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
-import {HttpClient} from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { PetService } from './pet.service';
+import { HttpErrorHandler } from '../error.service';
+import { Pet } from './pet';
+import { environment } from '../../environments/environment';
 
 describe('PetService', () => {
+  let service: PetService;
+  let httpMock: HttpTestingController;
+  const entityUrl = environment.REST_API_URL + 'pets';
+
+  const mockOwner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
+  const mockPet: Pet = { id: 1, name: 'Leo', birthDate: '2010-09-07', type: { id: 1, name: 'cat' }, owner: mockOwner, ownerId: 1, visits: [] };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // Import the HttpClient mocking services
       imports: [HttpClientTestingModule],
-      providers: [PetService]
+      providers: [PetService, HttpErrorHandler]
     });
+    service = TestBed.inject(PetService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('should ...', waitForAsync(inject([HttpTestingController], (petService: PetService, http: HttpClient) => {
-    expect(petService).toBeTruthy();
-  })));
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('should return pets on getPets', () => {
+    service.getPets().subscribe(pets => {
+      expect(pets.length).toBe(1);
+      expect(pets[0].name).toBe('Leo');
+    });
+    const req = httpMock.expectOne(entityUrl);
+    expect(req.request.method).toBe('GET');
+    req.flush([mockPet]);
+  });
+
+  it('should return a pet by id on getPetById', () => {
+    service.getPetById(1).subscribe(pet => {
+      expect(pet).toEqual(mockPet);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPet);
+  });
+
+  it('should add a pet on addPet', () => {
+    const newPet = { ...mockPet, id: null };
+    service.addPet(newPet as any).subscribe(pet => {
+      expect(pet).toEqual(mockPet);
+    });
+    const expectedUrl = environment.REST_API_URL + 'owners/1/pets';
+    const req = httpMock.expectOne(expectedUrl);
+    expect(req.request.method).toBe('POST');
+    req.flush(mockPet);
+  });
+
+  it('should update a pet on updatePet', () => {
+    service.updatePet('1', mockPet).subscribe(pet => {
+      expect(pet).toEqual(mockPet);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('PUT');
+    req.flush(mockPet);
+  });
+
+  it('should delete a pet on deletePet', () => {
+    service.deletePet('1').subscribe(response => {
+      expect(response).toBe(204);
+    });
+    const req = httpMock.expectOne(entityUrl + '/1');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(204);
+  });
 });

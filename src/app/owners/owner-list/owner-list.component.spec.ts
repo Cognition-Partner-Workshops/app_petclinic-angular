@@ -28,10 +28,10 @@ import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 
 import {OwnerListComponent} from './owner-list.component';
 import {FormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
-import {Observable, of} from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
 import {CommonModule} from '@angular/common';
 import {PartsModule} from '../../parts/parts.module';
@@ -46,6 +46,9 @@ import Spy = jasmine.Spy;
 
 class OwnerServiceStub {
   getOwners(): Observable<Owner[]> {
+    return of();
+  }
+  searchOwners(lastName: string): Observable<Owner[]> {
     return of();
   }
 }
@@ -136,5 +139,39 @@ describe('OwnerListComponent', () => {
       expect(el.innerText).toBe((testOwner.firstName.toString() + ' ' + testOwner.lastName.toString()));
     });
   }));
+
+  it('should navigate to owner detail on onSelect', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    const owner: Owner = testOwners[0];
+    component.onSelect(owner);
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', owner.id]);
+  });
+
+  it('should navigate to add owner on addOwner', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.addOwner();
+    expect(router.navigate).toHaveBeenCalledWith(['/owners/add']);
+  });
+
+  it('should search by last name with empty string', () => {
+    spy.and.returnValue(of(testOwners));
+    component.searchByLastName('');
+    expect(component.owners).toEqual(testOwners);
+  });
+
+  it('should search by last name with non-empty string', () => {
+    const searchSpy = spyOn(ownerService as any, 'searchOwners').and.returnValue(of(testOwners));
+    component.searchByLastName('Franklin');
+    expect(searchSpy).toHaveBeenCalledWith('Franklin');
+    expect(component.owners).toEqual(testOwners);
+  });
+
+  it('should set owners to null on searchOwners error', () => {
+    spyOn(ownerService as any, 'searchOwners').and.returnValue(throwError('search error'));
+    component.searchByLastName('InvalidName');
+    expect(component.owners).toBeNull();
+  });
 
 });

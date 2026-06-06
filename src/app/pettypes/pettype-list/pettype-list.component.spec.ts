@@ -7,7 +7,7 @@ import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
 import {FormsModule} from '@angular/forms';
-import {Observable, of} from 'rxjs/index';
+import {Observable, of, throwError} from 'rxjs';
 import Spy = jasmine.Spy;
 
 class PetTypeServiceStub {
@@ -69,5 +69,52 @@ describe('PettypeListComponent', () => {
     fixture.detectChanges();
     component.deletePettype(component.pettypes[0]);
     expect(spy.calls.any()).toBe(true, 'deletePetType called');
+  });
+
+  it('should remove pettype from list on successful delete', () => {
+    component.deletePettype(testPettypes[0]);
+    expect(component.pettypes.length).toBe(0);
+  });
+
+  it('should set errorMessage on deletePettype error', () => {
+    spy.and.returnValue(throwError('delete error'));
+    component.deletePettype(testPettypes[0]);
+    expect(component.errorMessage).toBe('delete error');
+  });
+
+  it('should load pettypes on init', () => {
+    const mockTypes: PetType[] = [{ id: 1, name: 'cat' }, { id: 2, name: 'dog' }];
+    spyOn(pettypeService, 'getPetTypes').and.returnValue(of(mockTypes));
+    component.ngOnInit();
+    expect(component.pettypes).toEqual(mockTypes);
+    expect(component.isPetTypesDataReceived).toBe(true);
+  });
+
+  it('should add pettype to list on onNewPettype', () => {
+    const newType: PetType = { id: 3, name: 'bird' };
+    component.onNewPettype(newType);
+    expect(component.pettypes).toContain(newType);
+  });
+
+  it('should toggle isInsert on showAddPettypeComponent', () => {
+    expect(component.isInsert).toBe(false);
+    component.showAddPettypeComponent();
+    expect(component.isInsert).toBe(true);
+    component.showAddPettypeComponent();
+    expect(component.isInsert).toBe(false);
+  });
+
+  it('should navigate to edit pettype on showEditPettypeComponent', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.showEditPettypeComponent(testPettypes[0]);
+    expect(router.navigate).toHaveBeenCalledWith(['/pettypes', '1', 'edit']);
+  });
+
+  it('should navigate to home on gotoHome', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    spyOn(router, 'navigate');
+    component.gotoHome();
+    expect(router.navigate).toHaveBeenCalledWith(['/welcome']);
   });
 });
