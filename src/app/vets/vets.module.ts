@@ -20,16 +20,16 @@
  * @author Vitaliy Fedoriv
  */
 
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatSelectModule} from '@angular/material/select';
-import {VetListComponent} from './vet-list/vet-list.component';
-import {VetService} from './vet.service';
-import {VetsRoutingModule} from './vets-routing.module';
-import {VetEditComponent} from './vet-edit/vet-edit.component';
-import {VetAddComponent} from './vet-add/vet-add.component';
-import {VetResolver} from './vet-resolver';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { VetListComponent } from './vet-list/vet-list.component';
+import { VetService } from './vet.service';
+import { VetsRoutingModule } from './vets-routing.module';
+import { VetEditComponent } from './vet-edit/vet-edit.component';
+import { VetAddComponent } from './vet-add/vet-add.component';
+import { VetResolver } from './vet-resolver';
 
 @NgModule({
   imports: [
@@ -37,19 +37,12 @@ import {VetResolver} from './vet-resolver';
     FormsModule,
     ReactiveFormsModule,
     MatSelectModule,
-    VetsRoutingModule
-  ],
-  declarations: [
+    VetsRoutingModule,
     VetListComponent,
     VetEditComponent,
-    VetAddComponent
+    VetAddComponent,
   ],
-  exports: [
-    VetListComponent,
-    VetEditComponent,
-    VetAddComponent
-  ],
-  providers: [VetService, VetResolver]
+  exports: [VetListComponent, VetEditComponent, VetAddComponent],
+  providers: [VetService, VetResolver],
 })
-export class VetsModule {
-}
+export class VetsModule {}

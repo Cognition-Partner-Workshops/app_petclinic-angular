@@ -22,8 +22,9 @@ import {
   OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { NgForm, FormsModule } from '@angular/forms';
 import { Specialty } from '../specialty';
 import { SpecialtyService } from '../specialty.service';
 
@@ -31,15 +32,18 @@ import { SpecialtyService } from '../specialty.service';
   selector: 'app-specialty-add',
   templateUrl: './specialty-add.component.html',
   styleUrls: ['./specialty-add.component.css'],
+  imports: [FormsModule],
 })
 export class SpecialtyAddComponent implements OnInit {
+  private specialtyService = inject(SpecialtyService);
+
   @ViewChild('specialityForm', { static: true }) specialityForm: NgForm;
   speciality: Specialty;
   addedSuccess = false;
   errorMessage: string;
   @Output() newSpeciality = new EventEmitter<Specialty>();
 
-  constructor(private specialtyService: SpecialtyService) {
+  constructor() {
     this.speciality = {} as Specialty;
   }
 
@@ -52,7 +56,7 @@ export class SpecialtyAddComponent implements OnInit {
         this.addedSuccess = true;
         this.newSpeciality.emit(this.speciality);
       },
-      (error) => (this.errorMessage = error as any)
+      (error) => (this.errorMessage = error as any),
     );
   }
 }

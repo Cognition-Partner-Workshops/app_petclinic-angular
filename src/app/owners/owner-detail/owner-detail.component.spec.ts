@@ -37,7 +37,7 @@ import { Observable, of } from 'rxjs';
 
 class OwnerServiceStub {
   getOwnerById(): Observable<Owner> {
-    return of({ id: 1, firstName: 'James', lastName: 'Franklin'  } as Owner);
+    return of({ id: 1, firstName: 'James', lastName: 'Franklin' } as Owner);
   }
 }
 
@@ -48,34 +48,28 @@ describe('OwnerDetailComponent', () => {
   let de: DebugElement;
   let el: HTMLElement;
   let router: Router;
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [OwnerDetailComponent],
-        schemas: [CUSTOM_ELEMENTS_SCHEMA],
-        imports: [FormsModule, RouterTestingModule],
-        providers: [
-          { provide: OwnerService, useClass: OwnerServiceStub },
-          { provide: Router, useClass: RouterStub },
-          { provide: ActivatedRoute, useClass: ActivatedRouteStub },
-        ],
-      }).compileComponents();
-    })
-  );
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [OwnerDetailComponent],
-        schemas: [CUSTOM_ELEMENTS_SCHEMA],
-        imports: [FormsModule, RouterTestingModule],
-        providers: [
-          { provide: OwnerService, useValue: ownerService },
-          { provide: Router, useClass: RouterStub },
-          { provide: ActivatedRoute, useClass: ActivatedRouteStub },
-        ],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      imports: [FormsModule, RouterTestingModule, OwnerDetailComponent],
+      providers: [
+        { provide: OwnerService, useClass: OwnerServiceStub },
+        { provide: Router, useClass: RouterStub },
+        { provide: ActivatedRoute, useClass: ActivatedRouteStub },
+      ],
+    }).compileComponents();
+  }));
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      imports: [FormsModule, RouterTestingModule, OwnerDetailComponent],
+      providers: [
+        { provide: OwnerService, useValue: ownerService },
+        { provide: Router, useClass: RouterStub },
+        { provide: ActivatedRoute, useClass: ActivatedRouteStub },
+      ],
+    }).compileComponents();
+  }));
 
   const owner: Owner = {
     id: 10,
@@ -91,7 +85,7 @@ describe('OwnerDetailComponent', () => {
     fixture = TestBed.createComponent(OwnerDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    router = TestBed.get(Router);
+    router = TestBed.inject(Router);
   });
 
   it('should create OwnerDetailComponent', () => {
@@ -106,7 +100,7 @@ describe('OwnerDetailComponent', () => {
       de = fixture.debugElement.query(By.css('.ownerFullName'));
       el = de.nativeElement;
       expect(el.innerText).toBe(
-        owner.firstName.toString() + ' ' + owner.lastName.toString()
+        owner.firstName.toString() + ' ' + owner.lastName.toString(),
       );
     });
   });
@@ -130,5 +124,4 @@ describe('OwnerDetailComponent', () => {
     spyOn(component, 'addPet').and.callThrough();
     expect(router.navigate).toHaveBeenCalledWith(['/owners']);
   });
-
 });

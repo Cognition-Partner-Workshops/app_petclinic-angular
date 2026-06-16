@@ -23,10 +23,10 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
-import {VetAddComponent} from './vet-add.component';
-import {FormsModule} from '@angular/forms';
+import { VetAddComponent } from './vet-add.component';
+import { FormsModule } from '@angular/forms';
 
 describe('VetAddComponent', () => {
   let component: VetAddComponent;
@@ -34,11 +34,9 @@ describe('VetAddComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [VetAddComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      imports: [FormsModule]
-    })
-      .compileComponents();
+      imports: [FormsModule, VetAddComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -46,8 +44,8 @@ describe('VetAddComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
-// TODO complete test
-//   it('should create', () => {
-//     expect(component).toBeTruthy();
-//   });
+  // TODO complete test
+  //   it('should create', () => {
+  //     expect(component).toBeTruthy();
+  //   });
 });
