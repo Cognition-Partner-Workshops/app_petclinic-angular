@@ -5,7 +5,7 @@
     "baseUrl": "src",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "ES2022",
@@ -13,11 +13,16 @@
       "node_modules/@types"
     ],
     "lib": [
-      "es2017",
+      "ES2022",
       "dom"
     ],
-    "module": "es2020",
-    "useDefineForClassFields": false
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+    "skipLibCheck": true
   },
   "angularCompilerOptions": {
     "strictTemplates": true,

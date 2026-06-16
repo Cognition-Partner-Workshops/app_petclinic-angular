@@ -26,6 +26,7 @@ import { Owner } from '../owner';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
+  standalone: false,
   selector: 'app-owner-edit',
   templateUrl: './owner-edit.component.html',
   styleUrls: ['./owner-edit.component.css'],

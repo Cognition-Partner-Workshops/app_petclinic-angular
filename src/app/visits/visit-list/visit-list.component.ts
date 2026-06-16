@@ -26,6 +26,7 @@ import {VisitService} from '../visit.service';
 import {Router} from '@angular/router';
 
 @Component({
+  standalone: false,
   selector: 'app-visit-list',
   templateUrl: './visit-list.component.html',
   styleUrls: ['./visit-list.component.css']

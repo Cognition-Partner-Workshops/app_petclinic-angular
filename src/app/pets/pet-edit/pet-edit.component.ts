@@ -29,10 +29,11 @@ import {Owner} from '../../owners/owner';
 import {PetType} from '../../pettypes/pettype';
 import {PetTypeService} from '../../pettypes/pettype.service';
 
-import * as moment from 'moment';
+import moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
 
 @Component({
+  standalone: false,
   selector: 'app-pet-edit',
   templateUrl: './pet-edit.component.html',
   styleUrls: ['./pet-edit.component.css']
