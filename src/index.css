@@ -1,0 +1,33 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+body {
+  padding-top: 50px;
+}
+
+.title {
+  text-align: center;
+}
+
+.xd-container {
+  margin-top: 20px;
+}
+
+.ownerFullName {
+  font-weight: bold;
+}
+
+.table td {
+  vertical-align: middle !important;
+}
+
+.navbar-brand span {
+  background: url('/images/spring-logo-dataflow.png') no-repeat center center;
+  background-size: contain;
+  display: inline-block;
+  width: 200px;
+  height: 35px;
+}
+
+.form-group .btn + .btn {
+  margin-left: 5px;
+}
