@@ -3,6 +3,7 @@ import {PetType} from '../pettype';
 import {PetTypeService} from '../pettype.service';
 
 @Component({
+  standalone: false,
   selector: 'app-pettype-add',
   templateUrl: './pettype-add.component.html',
   styleUrls: ['./pettype-add.component.css']
