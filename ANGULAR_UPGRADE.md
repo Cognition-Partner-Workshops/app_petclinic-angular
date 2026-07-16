@@ -71,3 +71,43 @@ Breaking changes / notable updates:
 - **tsconfig `lib`** bumped to `es2022`.
 - `@angular/animations` / `@angular/platform-browser-dynamic` are back on the release train (`21.2.18`), so no `--force` was needed for this step.
 - **Node support**: Angular 21 requires Node `^22.22.3 || ^24.15.0 || >=26.0.0`.
+
+## v21 → v22
+
+Ran: `ng update @angular/core@22 @angular/cli@22 @angular/material@22 @angular/cdk@22 @angular-eslint/schematics@22 ... --force`
+
+`--force` was required because the pre-existing lint stack (`@typescript-eslint@6/7`, `codelyzer@6`, `eslint@8`) was incompatible with the new toolchain (`eslint@10`, `angular-eslint@22`, which need `typescript-eslint@8`). The lint stack was migrated separately (see below).
+
+Framework breaking changes / notable updates handled by schematics:
+- **`ChangeDetectionStrategy.Eager` added to every component.** v22 changes change-detection defaults; the migration annotated all 24 components with `changeDetection: ChangeDetectionStrategy.Eager` to preserve the previous (non-OnPush) behavior.
+- **`provideHttpClient` now requires `withXhr()`** when `HttpXhrBackend` is used — migration added `withXhr()` to `app.module.ts` and updated 6 spec files.
+- **TypeScript**: `5.9.3` → `6.0.3`.
+- **ESLint**: `8.x` → `10.x`; **`typescript-eslint`**: `7.x` → `8.x`.
+- tsconfig `extendedDiagnostics` (`nullishCoalescingNotNullable`, `optionalChainNotNullable`) suppressed by the migration.
+- **Node support**: Angular 22 requires Node `^22.22.3 || ^24.15.0 || >=26.0.0`.
+
+### Manual fixes required after the v22 schematics
+
+These are the breaking changes `ng update` could **not** fix automatically:
+
+1. **TypeScript 6.0 + Angular 22 enable `strict` by default.** The v16 project was non-strict, so ~40 `strictNullChecks` (TS2322) and `strictPropertyInitialization` (TS2564) errors appeared (e.g. `owner.id = null`, `errorMessage: string;` with no initializer). To keep the upgrade scoped to a framework bump and avoid rewriting business logic / model nullability, `"strict": false` was set **explicitly** in `tsconfig.json`, preserving the project's original TypeScript posture. *Recommended follow-up: enable `strict` and fix the types properly in a dedicated PR.*
+
+2. **`baseUrl` deprecated in TypeScript 6.0** (TS5101). Added `"ignoreDeprecations": "6.0"` to `tsconfig.json` (it is removed entirely in TS 7.0).
+
+3. **`moment` default import.** With `moduleResolution: "bundler"`, `import * as moment from "moment"` is no longer callable (TS2349). Switched the 4 usages to `import moment from "moment"` and enabled `"esModuleInterop": true`.
+
+4. **`async()` removed from `@angular/core/testing`** (TS2305). Replaced the deprecated `async(...)` test wrapper with `waitForAsync(...)` and removed the dead `async` import in 3 spec files (`owner-add`, `owner-edit`, `specialty-add`).
+
+5. **ESLint flat config migration.** ESLint 10 dropped `.eslintrc.json` support entirely (flat config only) and `ng lint` failed with "Could not find config file". Actions:
+   - Replaced `.eslintrc.json` with `eslint.config.js` (flat config using `typescript-eslint` + `angular-eslint`).
+   - Removed the obsolete/incompatible packages `codelyzer`, `@typescript-eslint/eslint-plugin`, `@typescript-eslint/parser`, and the individual `@angular-eslint/eslint-plugin*` / `template-parser` packages; added the unified `typescript-eslint@8` and `angular-eslint@22`, bumped `eslint-config-prettier` to v10.
+   - The new `angular-eslint` recommended set adds opinionated rules that require architectural migrations this NgModule/constructor-injection app has not adopted (`prefer-standalone`, `prefer-inject`, `prefer-on-push-component-change-detection`). These are disabled in `eslint.config.js` to keep lint scope equivalent to the original config. *Recommended follow-up: adopt standalone components + `inject()` and re-enable these rules.*
+
+6. **Duplicate asset filename build conflict.** `bootstrap.css` (from `node_modules`) and `src/assets/css/petclinic.css` each declare a `Glyphicons Halflings` `@font-face` pointing at a **different** `glyphicons-halflings-regular.svg`. Angular 22's asset pipeline emits both to the output root under the same filename, producing an intermittent `Conflict: Multiple assets emit different content to the same filename` build failure. Fixed by adding `"outputHashing": "media"` to the base build options so CSS-referenced resources get content hashes and no longer collide.
+
+## Result
+
+- `npm run build` — succeeds (deterministically) on Angular 22.0.7 / TypeScript 6.0.3.
+- `ng build --configuration production` — succeeds.
+- `npm run lint` — passes.
+- `npm run test-headless` — 43/43 specs pass.

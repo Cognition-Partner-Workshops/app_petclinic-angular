@@ -22,19 +22,21 @@ import {
   OnInit,
   Output,
   ViewChild,
-} from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { Specialty } from '../specialty';
-import { SpecialtyService } from '../specialty.service';
+  ChangeDetectionStrategy,
+} from "@angular/core";
+import { NgForm } from "@angular/forms";
+import { Specialty } from "../specialty";
+import { SpecialtyService } from "../specialty.service";
 
 @Component({
-    selector: 'app-specialty-add',
-    templateUrl: './specialty-add.component.html',
-    styleUrls: ['./specialty-add.component.css'],
-    standalone: false
+  selector: "app-specialty-add",
+  templateUrl: "./specialty-add.component.html",
+  styleUrls: ["./specialty-add.component.css"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SpecialtyAddComponent implements OnInit {
-  @ViewChild('specialityForm', { static: true }) specialityForm: NgForm;
+  @ViewChild("specialityForm", { static: true }) specialityForm: NgForm;
   speciality: Specialty;
   addedSuccess = false;
   errorMessage: string;
@@ -53,7 +55,7 @@ export class SpecialtyAddComponent implements OnInit {
         this.addedSuccess = true;
         this.newSpeciality.emit(this.speciality);
       },
-      (error) => (this.errorMessage = error as any)
+      (error) => (this.errorMessage = error as any),
     );
   }
 }

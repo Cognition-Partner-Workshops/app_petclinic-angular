@@ -35,6 +35,7 @@
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true,
+            "outputHashing": "media",
             "allowedCommonJsDependencies": [
               "moment"
             ]
