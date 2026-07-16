@@ -42,3 +42,19 @@ Breaking changes / notable updates:
 - **`ExperimentalPendingTasks` → `PendingTasks`** (stabilised; migration applied, no usages here).
 - Optional migrations available but **not** applied: `use-application-builder`, and `provide-initializer` (`APP_INITIALIZER` → `provideAppInitializer`, etc.). Neither is used in this codebase.
 - **Node support**: Angular 19 requires Node `^18.19.1 || ^20.11.1 || ^22.0.0`.
+
+## v19 → v20
+
+Ran: `ng update @angular/core@20 @angular/cli@20 @angular/material@20 @angular/cdk@20 @angular-eslint/schematics@20 ... --force`
+
+`--force` was required because two framework packages are being phased out and no longer track the main release train (see below), producing patch-level peer-dependency mismatches within v20. These are cosmetic (all still v20.x) and do not affect the build.
+
+Breaking changes / notable updates:
+- **`@angular/animations` and `@angular/platform-browser-dynamic` diverged from the release train.** `@20` resolves them to their last published patches (`animations@20.1.8`, `platform-browser-dynamic@20.0.7`) while the rest of the framework is `20.3.26`. Angular is winding these packages down (animations is moving into core; dynamic bootstrap is legacy). The version skew is expected and is the reason `--force` is needed.
+- **`TestBed.get()` removed** → migrated to `TestBed.inject()` (4 spec files updated).
+- **`DOCUMENT` token** moved from `@angular/common` to `@angular/core` (migration ran; no usages here).
+- **`InjectFlags` enum** deprecated/removed (migration ran; no usages here).
+- **`tsconfig.json`**: `moduleResolution` updated to `bundler`.
+- **Angular Material v20**: theming/token updates applied by the schematic.
+- Optional migrations available but **not** applied: `use-application-builder`, `control-flow-migration` (`*ngIf`/`*ngFor` → `@if`/`@for`), and `router-current-navigation`. These are stylistic/architectural and out of scope for a version bump.
+- **Node support**: Angular 20 requires Node `^20.19.0 || ^22.12.0 || >=24.0.0` (Node 18 dropped).
