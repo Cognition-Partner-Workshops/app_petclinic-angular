@@ -58,3 +58,16 @@ Breaking changes / notable updates:
 - **Angular Material v20**: theming/token updates applied by the schematic.
 - Optional migrations available but **not** applied: `use-application-builder`, `control-flow-migration` (`*ngIf`/`*ngFor` → `@if`/`@for`), and `router-current-navigation`. These are stylistic/architectural and out of scope for a version bump.
 - **Node support**: Angular 20 requires Node `^20.19.0 || ^22.12.0 || >=24.0.0` (Node 18 dropped).
+
+## v20 → v21
+
+Ran (on **Node 22.23.1** — Angular 21 requires Node `^22.22.3 || ^24.15.0 || >=26.0.0`): `ng update @angular/core@21 @angular/cli@21 @angular/material@21 @angular/cdk@21 @angular-eslint/schematics@21 ...`
+
+Breaking changes / notable updates:
+- **New block control-flow is now mandatory-migrated.** The `control-flow-migration` (optional in v20) runs by default in v21 and converted **all 19 templates** from `*ngIf`/`*ngFor`/`*ngSwitch` to `@if`/`@for`/`@switch`.
+- **Bootstrap options migrated to providers.** `bootstrapModule(AppModule)` now passes `applicationProviders: [provideZoneChangeDetection()]` — zone change detection is no longer implicit; it must be provided explicitly (`src/main.ts`).
+- **`ApplicationConfig`** moved from `@angular/platform-browser` to `@angular/core` (migration ran; no usages here).
+- **TypeScript**: `5.8.3` → `5.9.3`.
+- **tsconfig `lib`** bumped to `es2022`.
+- `@angular/animations` / `@angular/platform-browser-dynamic` are back on the release train (`21.2.18`), so no `--force` was needed for this step.
+- **Node support**: Angular 21 requires Node `^22.22.3 || ^24.15.0 || >=26.0.0`.
