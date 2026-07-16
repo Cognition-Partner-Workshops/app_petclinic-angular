@@ -30,3 +30,15 @@ Breaking changes / notable updates:
 - **Material** updated to v18 (MDC-based components; theming API changes handled by schematic).
 - Optional migration `use-application-builder` (new esbuild-based application builder) was **not** applied to keep the change set minimal; the project continues on the Webpack `browser` builder.
 - **Node support**: Angular 18 requires Node `^18.19.0 || ^20.11.0`.
+
+## v18 → v19
+
+Ran: `ng update @angular/core@19 @angular/cli@19 @angular/material@19 @angular/cdk@19 @angular-eslint/schematics@19 ...`
+
+Breaking changes / notable updates:
+- **Standalone is now the default.** In v19 components/directives/pipes are standalone unless stated otherwise. Since this app is still NgModule-based, the migration added `standalone: false` to all 24 declared components/directives (and test stubs) so they keep working. This is the single biggest source of file changes in this step.
+- **TypeScript**: `5.4.5` → `5.8.3` (minimum TS bumped).
+- **zone.js**: `0.14.x` → `0.15.x`.
+- **`ExperimentalPendingTasks` → `PendingTasks`** (stabilised; migration applied, no usages here).
+- Optional migrations available but **not** applied: `use-application-builder`, and `provide-initializer` (`APP_INITIALIZER` → `provideAppInitializer`, etc.). Neither is used in this codebase.
+- **Node support**: Angular 19 requires Node `^18.19.1 || ^20.11.1 || ^22.0.0`.
