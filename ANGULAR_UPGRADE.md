@@ -1,4 +1,4 @@
-# Angular Upgrade: v16 → v20
+# Angular Upgrade: v16 → v22
 
 This document records the incremental upgrade of `petclinic-angular` from Angular 16 to the latest Angular, and every breaking change encountered along the way.
 
@@ -19,3 +19,14 @@ Breaking changes / notable updates:
 - **New control-flow syntax** (`@if`/`@for`/`@switch`) introduced; existing `*ngIf`/`*ngFor` still supported. A migration escaped literal `@`/`}` characters in templates to HTML entities where needed.
 - **`TransferState`/`makeStateKey`/`StateKey`** moved from `@angular/platform-browser` to `@angular/core` (migration applied automatically).
 - **Node support**: Angular 17 requires Node `^18.13.0 || ^20.9.0`.
+
+## v17 → v18
+
+Ran: `ng update @angular/core@18 @angular/cli@18 @angular/material@18 @angular/cdk@18 @angular-eslint/schematics@18 ...`
+
+Breaking changes / notable updates:
+- **`HttpClientModule` deprecated** → replaced by the `provideHttpClient(withInterceptorsFromDi())` provider function (migration modified `app.module.ts` and all `*.service.ts` / `*.service.spec.ts` files). `HttpClientTestingModule` in specs was likewise replaced with `provideHttpClientTesting()`.
+- **`@angular-eslint` → v18**: requires `@typescript-eslint` v7/v8 (peer dep). `typescript-eslint` was subsequently aligned.
+- **Material** updated to v18 (MDC-based components; theming API changes handled by schematic).
+- Optional migration `use-application-builder` (new esbuild-based application builder) was **not** applied to keep the change set minimal; the project continues on the Webpack `browser` builder.
+- **Node support**: Angular 18 requires Node `^18.19.0 || ^20.11.0`.
