@@ -26,6 +26,7 @@ import {Owner} from '../owner';
 import {Router} from '@angular/router';
 
 @Component({
+  standalone: false,
   selector: 'app-owner-add',
   templateUrl: './owner-add.component.html',
   styleUrls: ['./owner-add.component.css']

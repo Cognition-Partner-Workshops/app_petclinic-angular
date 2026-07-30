@@ -28,11 +28,12 @@ import {PetType} from '../../pettypes/pettype';
 import {VisitService} from '../visit.service';
 import {ActivatedRoute, Router} from '@angular/router';
 
-import * as moment from 'moment';
+import moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
 import {PetService} from '../../pets/pet.service';
 
 @Component({
+  standalone: false,
   selector: 'app-visit-edit',
   templateUrl: './visit-edit.component.html',
   styleUrls: ['./visit-edit.component.css']

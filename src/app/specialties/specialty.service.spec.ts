@@ -25,14 +25,13 @@
 import { inject, TestBed, waitForAsync } from '@angular/core/testing';
 import {SpecialtyService} from './specialty.service';
 import {HttpClient} from '@angular/common/http';
-import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
+import {provideHttpClientTesting, HttpTestingController} from '@angular/common/http/testing';
+import {provideHttpClient} from '@angular/common/http';
 
 describe('SpecialtyService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // Import the HttpClient mocking services
-      imports: [HttpClientTestingModule],
-      providers: [SpecialtyService]
+      providers: [provideHttpClient(), provideHttpClientTesting(), SpecialtyService]
     });
   });
 

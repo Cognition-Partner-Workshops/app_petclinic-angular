@@ -25,15 +25,14 @@
 
 import { inject, TestBed, waitForAsync } from '@angular/core/testing';
 import {PetService} from './pet.service';
-import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
+import {provideHttpClientTesting, HttpTestingController} from '@angular/common/http/testing';
+import {provideHttpClient} from '@angular/common/http';
 import {HttpClient} from '@angular/common/http';
 
 describe('PetService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // Import the HttpClient mocking services
-      imports: [HttpClientTestingModule],
-      providers: [PetService]
+      providers: [provideHttpClient(), provideHttpClientTesting(), PetService]
     });
   });
 

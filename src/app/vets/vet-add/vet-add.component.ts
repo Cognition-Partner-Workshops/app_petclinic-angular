@@ -28,6 +28,7 @@ import {Router} from '@angular/router';
 import {VetService} from '../vet.service';
 
 @Component({
+  standalone: false,
   selector: 'app-vet-add',
   templateUrl: './vet-add.component.html',
   styleUrls: ['./vet-add.component.css']
